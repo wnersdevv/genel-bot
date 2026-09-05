@@ -1,0 +1,60 @@
+{
+  "genel": {
+    "hataOlustu": "An error occurred, please try again later.",
+    "yetkiYok": "You don't have permission to do this.",
+    "botYetkiYok": "I don't have the required permission to do this.",
+    "sadeceSunucuda": "This command can only be used inside a server.",
+    "modulKapali": "This module is currently disabled on this server.",
+    "komutKapali": "This command has been disabled on this server by an administrator.",
+    "gecersizKullanici": "You must specify a valid user.",
+    "kullaniciBulunamadi": "The specified user was not found on this server.",
+    "kendineKullanamazsin": "You can't use this command on yourself.",
+    "yetersizRutbe": "You don't have a high enough role to act on this user.",
+    "islemIptal": "Action cancelled.",
+    "islemOnaylandi": "Action confirmed.",
+    "cooldown": "You must wait **{sure} seconds** before using this command again.",
+    "yukleniyor": "Processing...",
+    "bulunamadi": "No records found.",
+    "basarili": "Action completed successfully.",
+    "sadeceGelistirici": "This command can only be used by developers."
+  },
+  "moderasyon": {
+    "uyariVerildi": "**{kullanici}** has been warned.",
+    "susturuldu": "**{kullanici}** has been muted for **{sure}**.",
+    "susturmaKaldirildi": "The mute on **{kullanici}** has been removed.",
+    "atildi": "**{kullanici}** has been kicked from the server.",
+    "yasaklandi": "**{kullanici}** has been banned from the server.",
+    "yasakKaldirildi": "The ban on **{kullanici}** has been lifted.",
+    "mesajlarSilindi": "**{adet}** messages were deleted successfully.",
+    "sebep": "Reason",
+    "sebepYok": "No reason provided"
+  },
+  "ticket": {
+    "acildi": "Ticket created successfully: {kanal}",
+    "kapatildi": "This ticket has been closed.",
+    "kilitlendi": "This ticket has been locked.",
+    "zatenTicketVar": "You can have at most **{limit}** open tickets at a time.",
+    "ticketDegil": "This channel is not a ticket.",
+    "yetkiliOlmali": "You must be a ticket staff member to do this."
+  },
+  "ekonomi": {
+    "bakiye": "Balance",
+    "cuzdan": "Wallet",
+    "banka": "Bank",
+    "yetersizBakiye": "You don't have enough money in your wallet.",
+    "gunlukAlindi": "You earned **{miktar}**!",
+    "gunlukZatenAlindi": "You must wait **{sure} hours** to claim your daily reward again."
+  },
+  "seviye": {
+    "seviyeAtladi": "Congratulations {kullanici}, you reached **Level {seviye}**!",
+    "xpYok": "**{kullanici}** hasn't earned any XP yet.",
+    "liderlikBos": "Nobody has earned XP yet."
+  },
+  "muzik": {
+    "sesKanalindaDegil": "You must be in a voice channel to use this command.",
+    "calanYok": "There is no song currently playing.",
+    "kuyrugaEklendi": "**{sarki}** was added to the queue.",
+    "simdiCaliyor": "Now playing: **{sarki}**",
+    "kuyrukBos": "The queue is empty."
+  }
+}

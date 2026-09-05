@@ -1,0 +1,51 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">📋 Denetim Kaydı</h1>
+<p class="sayfa-alt">Bu sunucuda yapılan kritik ayar değişiklikleri. Kayıtlar 90 gün sonra otomatik silinir, hassas değerler maskelenir.</p>
+
+<div class="tablo-sarici">
+    <table class="tablo">
+        <thead><tr><th>Tarih</th><th>Kullanıcı</th><th>İşlem</th><th>Hedef</th><th>Değişiklik</th><th>Kaynak</th></tr></thead>
+        <tbody id="auditTablo"><tr><td colspan="6">Yükleniyor...</td></tr></tbody>
+    </table>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+    <button class="buton ikincil" id="oncekiSayfa">◀️ Önceki</button>
+    <span id="sayfaBilgi" style="color:var(--text-muted);font-size:.85rem;"></span>
+    <button class="buton ikincil" id="sonrakiSayfa">Sonraki ▶️</button>
+</div>
+
+<script>
+const GUILD_ID = '<%= guild.id %>';
+let sayfa = 0;
+
+const SONUC_ROZET = { 'başarılı': 'rozet-yesil', 'reddedildi': 'rozet-kirmizi', 'hata': 'rozet-sari' };
+
+async function yukle() {
+    try {
+        const v = await window.wnersdevApi.al(`/api/guild/${GUILD_ID}/audit?sayfa=${sayfa}`);
+
+        document.getElementById('auditTablo').innerHTML = v.kayitlar.length
+            ? v.kayitlar.map(k => `<tr>
+                <td style="white-space:nowrap;font-size:.8rem;">${new Date(k.createdAt).toLocaleString('tr-TR')}</td>
+                <td>${k.kullaniciEtiketi || k.kullaniciId}</td>
+                <td>${k.islem} <span class="rozet ${SONUC_ROZET[k.sonuc] || 'rozet-mor'}">${k.sonuc}</span></td>
+                <td><code style="font-size:.78rem;">${k.hedef || '—'}</code></td>
+                <td style="font-size:.8rem;">${k.eskiDeger ? `<span style="color:var(--danger);">${k.eskiDeger}</span> → ` : ''}<span style="color:var(--success);">${k.yeniDeger || '—'}</span></td>
+                <td><span class="rozet rozet-mor">${k.kaynak}</span></td>
+              </tr>`).join('')
+            : '<tr><td colspan="6">Henüz denetim kaydı yok.</td></tr>';
+
+        document.getElementById('sayfaBilgi').textContent = `Sayfa ${v.sayfa + 1} / ${v.toplamSayfa} · Toplam ${v.toplam} kayıt`;
+        document.getElementById('oncekiSayfa').disabled = v.sayfa === 0;
+        document.getElementById('sonrakiSayfa').disabled = v.sayfa >= v.toplamSayfa - 1;
+    } catch (e) {
+        document.getElementById('auditTablo').innerHTML = `<tr><td colspan="6">❌ ${e.message}</td></tr>`;
+    }
+}
+
+document.getElementById('oncekiSayfa').addEventListener('click', () => { if (sayfa > 0) { sayfa--; yukle(); } });
+document.getElementById('sonrakiSayfa').addEventListener('click', () => { sayfa++; yukle(); });
+yukle();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

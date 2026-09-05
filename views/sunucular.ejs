@@ -1,0 +1,71 @@
+<%- include('partials/kabukBasla', { guild: null, aktif: 'sunucular', sayfaBaslik: 'Sunucularım', kullanici, config }) %>
+<h1 class="sayfa-baslik">Sunucularım</h1>
+<p class="sayfa-alt">
+    Yönetme yetkiniz olan sunucular listeleniyor.
+    <span class="rozet rozet-yesil">🟢 Bot ekli</span>
+    <span class="rozet rozet-sari">➕ Bot ekli değil</span>
+</p>
+
+<div class="form-alan" style="max-width:340px;">
+    <input class="giris-input" id="sunucuArama" placeholder="🔎 Sunucu ara...">
+</div>
+
+<div class="grid" id="sunucuListesi">
+    <% sunucular.forEach(function(s) { %>
+        <div class="kart sunucu-kart" data-isim="<%= s.isim.toLowerCase() %>" data-ekli="<%= s.botEkliMi %>">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+                <% if (s.ikonUrl) { %>
+                    <img src="<%= s.ikonUrl %>" alt="" style="width:48px;height:48px;border-radius:12px;">
+                <% } else { %>
+                    <div style="width:48px;height:48px;border-radius:12px;background:var(--card-hover);display:flex;align-items:center;justify-content:center;font-weight:700;">
+                        <%= s.isim.charAt(0).toUpperCase() %>
+                    </div>
+                <% } %>
+                <div style="min-width:0;">
+                    <div style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><%= s.isim %></div>
+                    <div style="font-size:.78rem; color:var(--text-muted);">
+                        <% if (s.botEkliMi) { %>
+                            <span class="durum-noktasi durum-yesil"></span><%= s.üyeSayısı %> üye
+                        <% } else { %>
+                            <span class="durum-noktasi durum-kirmizi"></span>Bot ekli değil
+                        <% } %>
+                        <% if (s.sahipMi) { %> · 👑 Sahip<% } %>
+                    </div>
+                </div>
+            </div>
+
+            <% if (s.botEkliMi) { %>
+                <a class="buton" style="display:block;text-align:center;" href="/sunucu/<%= s.id %>">⚙️ Yönet</a>
+            <% } else { %>
+                <a class="buton ikincil" style="display:block;text-align:center;"
+                   href="https://discord.com/oauth2/authorize?client_id=<%= clientId %>&scope=bot%20applications.commands&permissions=8&guild_id=<%= s.id %>&disable_guild_select=true"
+                   target="_blank" rel="noopener">➕ Botu Davet Et</a>
+            <% } %>
+        </div>
+    <% }) %>
+</div>
+
+<% if (sunucular.length === 0) { %>
+    <div class="hata-kutusu">
+        <h3>Yönetebileceğiniz sunucu bulunamadı</h3>
+        <p>Bir sunucuyu buradan yönetebilmek için o sunucuda <b>Sunucuyu Yönet</b> yetkisine sahip olmalısınız.</p>
+    </div>
+<% } %>
+
+<p id="sonucYok" style="display:none;color:var(--text-muted);">Aramanızla eşleşen sunucu bulunamadı.</p>
+
+<script>
+document.getElementById('sunucuArama').addEventListener('input', (e) => {
+    const arama = e.target.value.toLowerCase();
+    let gorunen = 0;
+
+    document.querySelectorAll('.sunucu-kart').forEach(kart => {
+        const eslesti = kart.dataset.isim.includes(arama);
+        kart.style.display = eslesti ? '' : 'none';
+        if (eslesti) gorunen++;
+    });
+
+    document.getElementById('sonucYok').style.display = gorunen === 0 ? 'block' : 'none';
+});
+</script>
+<%- include('partials/kabukBitir', { guild: null }) %>

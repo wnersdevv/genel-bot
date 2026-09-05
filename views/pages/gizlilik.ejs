@@ -1,0 +1,44 @@
+<%- include('../partials/kabukBasla', { guild: null, aktif: '', sayfaBaslik: 'Gizlilik Politikası', kullanici, config }) %>
+<div style="max-width:820px;">
+    <h1 class="sayfa-baslik">🔒 Gizlilik Politikası</h1>
+    <p class="sayfa-alt">Son güncelleme: <%= new Date().toLocaleDateString('tr-TR') %></p>
+
+    <div class="kart" style="line-height:1.7;">
+        <h3>1. Toplanan Veriler</h3>
+        <p>Bot yalnızca çalışması için gereken verileri saklar:</p>
+        <ul>
+            <li><b>Sunucu verileri:</b> Sunucu ID'si, yapılandırma ayarları, modül durumları, kanal ve rol ID'leri.</li>
+            <li><b>Kullanıcı verileri:</b> Kullanıcı ID'si; yalnızca kullandığınız özelliklerle sınırlı olarak seviye/XP, ekonomi bakiyesi, uyarı kayıtları, ticket geçmişi, doğum günü (girdiyseniz), AFK mesajı.</li>
+            <li><b>Ticket transkriptleri:</b> Ticket kanallarındaki mesajlar, ticket kapatıldığında kayıt amacıyla saklanır.</li>
+            <li><b>Dashboard oturumu:</b> Discord OAuth2 ile giriş yaptığınızda kullanıcı ID'niz, kullanıcı adınız, avatarınız ve yönetebildiğiniz sunucuların listesi oturum süresince tutulur.</li>
+        </ul>
+
+        <h3>2. Toplanmayan Veriler</h3>
+        <p>Bot; şifrenizi, e-postanızı, ödeme bilgilerinizi veya özel mesajlarınızı <b>toplamaz</b>. Ticket kanalları dışındaki normal mesaj içerikleri kalıcı olarak saklanmaz.</p>
+
+        <h3>3. Verilerin Kullanım Amacı</h3>
+        <p>Veriler yalnızca botun özelliklerini sunmak (seviye takibi, moderasyon geçmişi, ekonomi vb.) için kullanılır. Üçüncü taraflara <b>satılmaz veya paylaşılmaz</b>.</p>
+
+        <h3>4. Veri Saklama Süresi</h3>
+        <ul>
+            <li>Bot sunucudan çıkarıldığında o sunucuya ait veriler talep üzerine silinir.</li>
+            <li>Log dosyaları 14 gün sonra otomatik olarak silinir.</li>
+            <li>Dashboard oturumları 7 gün sonra sona erer.</li>
+        </ul>
+
+        <h3>5. Haklarınız</h3>
+        <p>Size ait verilerin bir kopyasını talep edebilir veya silinmesini isteyebilirsiniz. Bunun için destek sunucusu üzerinden iletişime geçmeniz yeterlidir.</p>
+
+        <h3>6. Güvenlik</h3>
+        <p>Veriler MongoDB üzerinde saklanır. Dashboard erişimi Discord OAuth2 ile doğrulanır, oturumlar CSRF korumasıyla güvence altına alınır ve yalnızca sunucuyu yönetme yetkisine sahip kişiler ayarlara erişebilir.</p>
+
+        <h3>7. İletişim</h3>
+        <p>Gizlilikle ilgili sorularınız için <a href="<%= config.destekSunucusu %>" target="_blank" rel="noopener">destek sunucumuza</a> katılabilirsiniz.</p>
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:10px;">
+        <a class="buton ikincil" href="/hizmet-sartlari">📜 Hizmet Şartları</a>
+        <a class="buton ikincil" href="/">← Ana Sayfa</a>
+    </div>
+</div>
+<%- include('../partials/kabukBitir', { guild: null }) %>

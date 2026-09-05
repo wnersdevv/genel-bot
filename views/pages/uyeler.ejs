@@ -1,0 +1,44 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">👥 Üye Yönetimi</h1>
+<p class="sayfa-alt">Sunucudaki üyeleri arayın ve görüntüleyin.</p>
+
+<div class="form-alan" style="max-width:340px;">
+    <input class="giris-input" id="uyeArama" placeholder="🔎 Kullanıcı adı veya ID ile ara...">
+</div>
+
+<div class="tablo-sarici">
+    <table class="tablo">
+        <thead><tr><th></th><th>Kullanıcı</th><th>ID</th><th>Rol Sayısı</th><th>Katılma</th></tr></thead>
+        <tbody id="uyeTablo"><tr><td colspan="5">Yükleniyor...</td></tr></tbody>
+    </table>
+</div>
+<p id="uyeToplam" style="color:var(--text-muted);font-size:.82rem;margin-top:10px;"></p>
+
+<script>
+let zamanlayici;
+async function uyeleriYukle(ara = '') {
+    document.getElementById('uyeTablo').innerHTML = '<tr><td colspan="5">Yükleniyor...</td></tr>';
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/uyeler?ara=' + encodeURIComponent(ara));
+        document.getElementById('uyeTablo').innerHTML = veri.uyeler.length
+            ? veri.uyeler.map(u => `<tr>
+                <td><img src="${u.avatar}" style="width:32px;height:32px;border-radius:50%;"></td>
+                <td>${u.goruntulenenAd}${u.bot ? ' <span class="rozet rozet-mor">BOT</span>' : ''}</td>
+                <td style="color:var(--text-muted);font-size:.8rem;">${u.id}</td>
+                <td>${u.rolSayisi}</td>
+                <td>${u.katilmaTarihi ? window.wnersdevApi.zamanOnce(u.katilmaTarihi) : '—'}</td>
+              </tr>`).join('')
+            : '<tr><td colspan="5">Sonuç bulunamadı.</td></tr>';
+        document.getElementById('uyeToplam').textContent = `${veri.gosterilen} / ${veri.toplam} üye gösteriliyor (maks. 50).`;
+    } catch {
+        document.getElementById('uyeTablo').innerHTML = '<tr><td colspan="5">❌ Yüklenemedi. <button class="buton ikincil" onclick="uyeleriYukle()">Tekrar Dene</button></td></tr>';
+    }
+}
+uyeleriYukle();
+
+document.getElementById('uyeArama').addEventListener('input', (e) => {
+    clearTimeout(zamanlayici);
+    zamanlayici = setTimeout(() => uyeleriYukle(e.target.value), 300);
+});
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

@@ -1,0 +1,130 @@
+<%- include('../partials/kabukBasla', { guild: null, aktif: '', sayfaBaslik: 'Komut Rehberi', kullanici, config }) %>
+<div style="max-width:900px;">
+    <h1 class="sayfa-baslik">📖 Komut Rehberi</h1>
+    <p class="sayfa-alt">Komutların nasıl kullanıldığını buradan öğrenebilirsiniz.</p>
+
+    <div class="kart" style="margin-bottom:20px;">
+        <h3 style="margin-top:0;">🎬 Örnek Kullanım</h3>
+        <p style="color:var(--text-muted);font-size:.88rem;">
+            Aşağıdaki animasyon, bir moderasyon komutunun nasıl çalıştığını gösteren bir <b>temsili örnektir</b>.
+        </p>
+        <img src="/demo/komut-demo.svg" alt="Komut kullanım animasyonu" style="width:100%;max-width:640px;border-radius:10px;">
+    </div>
+
+    <div class="grid-2">
+        <div class="kart">
+            <h3 style="margin-top:0;">⚡ Slash Komutlar</h3>
+            <p style="color:var(--text-muted);font-size:.9rem;">Sohbete <code>/</code> yazın, Discord komutları önerecektir. Parametreleri kutucuklara doldurmanız yeterli.</p>
+            <code style="display:block;background:var(--background);padding:10px;border-radius:8px;">/uyar kullanıcı:@Ahmet sebep:Kural ihlali</code>
+        </div>
+
+        <div class="kart">
+            <h3 style="margin-top:0;">⌨️ Prefix Komutlar</h3>
+            <p style="color:var(--text-muted);font-size:.9rem;">Tüm komutlar prefix ile de çalışır. Varsayılan prefix <code>!</code>, sunucudan değiştirilebilir.</p>
+            <code style="display:block;background:var(--background);padding:10px;border-radius:8px;">!uyar @Ahmet Kural ihlali</code>
+        </div>
+
+        <div class="kart">
+            <h3 style="margin-top:0;">🧩 Alt Komutlar</h3>
+            <p style="color:var(--text-muted);font-size:.9rem;">Bazı komutlar gruplanmıştır. Ana komuttan sonra alt komut adını yazın.</p>
+            <code style="display:block;background:var(--background);padding:10px;border-radius:8px;">/ticket kur<br>!ticket kapat spam</code>
+        </div>
+
+        <div class="kart">
+            <h3 style="margin-top:0;">📝 Yazım Kuralı</h3>
+            <p style="color:var(--text-muted);font-size:.9rem;">Yardım metinlerinde parametreler şu şekilde gösterilir:</p>
+            <ul style="font-size:.9rem;">
+                <li><code>&lt;zorunlu&gt;</code> — mutlaka girilmeli</li>
+                <li><code>[opsiyonel]</code> — isteğe bağlı</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="kart" style="margin-top:20px;">
+        <h3 style="margin-top:0;">🆘 Bot İçinden Yardım</h3>
+        <p style="color:var(--text-muted);font-size:.9rem;">Discord içinde de tam yardım menüsüne ulaşabilirsiniz:</p>
+        <ul style="font-size:.9rem;line-height:1.9;">
+            <li><code>/yardım</code> — kategori menüsü ve tüm komut listesi</li>
+            <li><code>/yardım komut:uyar</code> — tek bir komutun tüm detayı</li>
+            <li><code>/bot istatistik</code> — bot durumu ve istatistikleri</li>
+            <li><code>/dil ayarla</code> — Türkçe / English dil seçimi</li>
+        </ul>
+    </div>
+
+    <div class="kart" style="margin-top:20px;">
+        <h3 style="margin-top:0;">🔍 Tüm Komutlar</h3>
+        <div class="grid-2" style="margin-bottom:14px;">
+            <input class="giris-input" id="komutArama" placeholder="🔎 Komut ara...">
+            <select class="giris-select" id="kategoriFiltre"><option value="">Tüm Kategoriler</option></select>
+        </div>
+        <div id="komutListesi"><div class="iskelet" style="height:200px;"></div></div>
+        <p id="komutSayac" style="color:var(--text-muted);font-size:.82rem;margin-top:10px;"></p>
+    </div>
+
+    <script>
+    let TUM = [];
+    const KATEGORI_AD = {
+        moderasyon:'🛡️ Moderasyon', koruma:'🔐 Koruma', mesaj:'🧹 Mesaj Filtreleme', ticket:'🎫 Ticket',
+        muzik:'🎵 Müzik', eglence:'🎮 Eğlence', ekonomi:'💰 Ekonomi', seviye:'⭐ Seviye',
+        cekilis:'🎉 Çekiliş', oneri:'💡 Öneri', 'ozel-oda':'🏠 Özel Oda', sosyal:'👥 Sosyal',
+        bilgi:'ℹ️ Bilgi', araclar:'🧰 Araçlar', yonetim:'👑 Yönetim', sistem:'⚙️ Sistem'
+    };
+
+    function ciz(liste) {
+        if (!liste.length) {
+            document.getElementById('komutListesi').innerHTML = '<p style="color:var(--text-muted);">Sonuç bulunamadı.</p>';
+            document.getElementById('komutSayac').textContent = '';
+            return;
+        }
+
+        const gruplar = {};
+        liste.forEach(k => { (gruplar[k.kategori] = gruplar[k.kategori] || []).push(k); });
+
+        document.getElementById('komutListesi').innerHTML = Object.entries(gruplar).map(([kat, komutlar]) => `
+            <div style="margin-bottom:18px;">
+                <h4 style="margin:0 0 8px;color:var(--primary);">${KATEGORI_AD[kat] || kat} <span style="color:var(--text-muted);font-weight:400;font-size:.85rem;">(${komutlar.length})</span></h4>
+                ${komutlar.map(k => `
+                    <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <code style="font-weight:700;">${k.slashMi ? '/' : '!'}${k.isim}</code>
+                            ${k.slashMi ? '<span class="rozet rozet-yesil">slash</span>' : '<span class="rozet rozet-sari">prefix</span>'}
+                            ${k.gerekliYetki !== 'Herkes' ? `<span class="rozet rozet-mor">${k.gerekliYetki}</span>` : ''}
+                        </div>
+                        <div style="color:var(--text-muted);font-size:.86rem;margin:4px 0;">${k.açıklama}</div>
+                        <code style="font-size:.8rem;color:var(--text-muted);">${k.örnek}</code>
+                        ${k.aliaslar.length ? `<div style="font-size:.78rem;margin-top:3px;color:var(--text-muted);">Kısayol: ${k.aliaslar.map(a=>`<code>!${a}</code>`).join(' ')}</div>` : ''}
+                    </div>`).join('')}
+            </div>`).join('');
+
+        document.getElementById('komutSayac').textContent = `${liste.length} / ${TUM.length} komut gösteriliyor`;
+    }
+
+    (async () => {
+        try {
+            const v = await window.wnersdevApi.al('/api/genel/komutlar');
+            TUM = v.komutlar;
+            ciz(TUM);
+            const kats = [...new Set(TUM.map(k => k.kategori))].sort();
+            const sec = document.getElementById('kategoriFiltre');
+            kats.forEach(k => sec.insertAdjacentHTML('beforeend', `<option value="${k}">${KATEGORI_AD[k] || k}</option>`));
+        } catch {
+            document.getElementById('komutListesi').innerHTML = '<p>❌ Komut listesi yüklenemedi.</p>';
+        }
+    })();
+
+    function filtrele() {
+        const a = document.getElementById('komutArama').value.toLowerCase();
+        const k = document.getElementById('kategoriFiltre').value;
+        ciz(TUM.filter(x => (!k || x.kategori === k) && (x.isim.toLowerCase().includes(a) || x.açıklama.toLowerCase().includes(a))));
+    }
+    document.getElementById('komutArama').addEventListener('input', filtrele);
+    document.getElementById('kategoriFiltre').addEventListener('change', filtrele);
+    </script>
+
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="buton" href="https://discord.com/oauth2/authorize?client_id=<%= clientId %>&scope=bot%20applications.commands&permissions=8" target="_blank" rel="noopener">➕ Botu Davet Et</a>
+        <a class="buton ikincil" href="/hizmet-sartlari">📜 Hizmet Şartları</a>
+        <a class="buton ikincil" href="/gizlilik">🔒 Gizlilik</a>
+    </div>
+</div>
+<%- include('../partials/kabukBitir', { guild: null }) %>

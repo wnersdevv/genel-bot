@@ -1,0 +1,43 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🎵 Müzik</h1>
+<p class="sayfa-alt">Şu anda çalan şarkı ve kuyruk — 5 saniyede bir canlı yenilenir.</p>
+
+<div class="kart" style="margin-bottom:20px;">
+    <div class="baslik" style="color:var(--text-muted);font-weight:600;margin-bottom:10px;">🎧 Şu An Çalıyor</div>
+    <div id="suAnCalan">Yükleniyor...</div>
+</div>
+
+<div class="tablo-sarici">
+    <table class="tablo">
+        <thead><tr><th>#</th><th>Şarkı</th><th>Ekleyen</th></tr></thead>
+        <tbody id="kuyrukTablo"><tr><td colspan="3">Yükleniyor...</td></tr></tbody>
+    </table>
+</div>
+
+<script>
+function sureFormatla(sn) {
+    const dk = Math.floor(sn / 60);
+    const kalan = Math.floor(sn % 60);
+    return `${dk}:${kalan.toString().padStart(2, '0')}`;
+}
+
+async function yukle() {
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/muzik');
+
+        document.getElementById('suAnCalan').innerHTML = veri.suAnCalan
+            ? `<b>${veri.suAnCalan.baslik}</b> (${sureFormatla(veri.suAnCalan.sureSn)})<br>
+               <span style="color:var(--text-muted);font-size:.85rem;">Ekleyen: ${veri.suAnCalan.ekleyenId} — Ses: %${veri.sesSeviye} — Döngü: ${veri.dongu} — ${veri.durduruldu ? '⏸️ Duraklatıldı' : '▶️ Çalıyor'}</span>`
+            : '<span style="color:var(--text-muted);">Şu anda hiçbir sunucuda müzik çalmıyor.</span>';
+
+        document.getElementById('kuyrukTablo').innerHTML = veri.kuyruk.length
+            ? veri.kuyruk.map((s, i) => `<tr><td>${i + 1}</td><td>${s.baslik}</td><td>${s.ekleyenId}</td></tr>`).join('')
+            : '<tr><td colspan="3">Kuyruk boş.</td></tr>';
+    } catch {
+        document.getElementById('suAnCalan').innerHTML = '❌ Yüklenemedi.';
+    }
+}
+yukle();
+setInterval(yukle, 5000);
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

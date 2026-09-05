@@ -1,0 +1,72 @@
+        </main>
+
+        <footer class="altbilgi">
+            <div style="margin-bottom:6px;">
+                <a href="/komutlar">Komut Rehberi</a> ·
+                <a href="/hizmet-sartlari">Hizmet Şartları</a> ·
+                <a href="/gizlilik">Gizlilik Politikası</a> ·
+                <a href="<%= config.destekSunucusu %>" target="_blank" rel="noopener">Destek</a>
+            </div>
+            wnersdev • Discord Bot Yönetim Paneli — © 2026 wnersdev
+        </footer>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+    // Aktif temayı seçim kutusuna yansıt
+    document.getElementById('temaSecim').value = window.wnersdevTema.mevcutTema();
+    function guncelleModIkon() {
+        document.getElementById('modButon').textContent = window.wnersdevTema.mevcutMod() === 'dark' ? '🌙' : '☀️';
+    }
+    guncelleModIkon();
+
+    // Profil / bildirim menülerini dışarı tıklayınca kapat
+    document.addEventListener('click', (e) => {
+        const profilMenu = document.getElementById('profilMenu');
+        const bildirimPanel = document.getElementById('bildirimPanel');
+        if (profilMenu && !e.target.closest('.profil-dropdown')) profilMenu.classList.remove('acik');
+        if (bildirimPanel && !e.target.closest('.profil-dropdown')) {} // ayrı dropdown, aşağıda ayrıca yönetiliyor
+    });
+
+    <% if (typeof guild !== 'undefined' && guild) { %>
+    // Bildirim merkezi (son gerçek etkinlikler) — REST ile ilk yükleme + Socket.IO ile canlı ekleme
+    const bildirimZil = document.getElementById('bildirimZil');
+    const bildirimPanel = document.getElementById('bildirimPanel');
+    let bildirimlerYuklendi = false;
+
+    async function bildirimleriYukle() {
+        try {
+            const bildirimler = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/bildirimler');
+            document.getElementById('bildirimNokta').style.display = bildirimler.length ? 'block' : 'none';
+            bildirimPanel.innerHTML = bildirimler.length
+                ? bildirimler.map(b => `<div class="bildirim-oge">${b.metin}<div class="zaman">${window.wnersdevApi.zamanOnce(b.tarih)}</div></div>`).join('')
+                : '<div class="bildirim-oge">Henüz bir etkinlik yok.</div>';
+            bildirimlerYuklendi = true;
+        } catch {
+            bildirimPanel.innerHTML = '<div class="bildirim-oge">Bildirimler yüklenemedi.</div>';
+        }
+    }
+
+    bildirimZil.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        bildirimPanel.classList.toggle('acik');
+        if (!bildirimlerYuklendi) await bildirimleriYukle();
+    });
+    document.addEventListener('click', () => bildirimPanel.classList.remove('acik'));
+    bildirimPanel.addEventListener('click', (e) => e.stopPropagation());
+
+    // Gerçek zamanlı: ticket/uyarı/çekiliş oluştuğunda anında zile düşer
+    const dashboardSoket = io({ path: '/soket' });
+    dashboardSoket.emit('guildOdasinaKatil', '<%= guild.id %>');
+    dashboardSoket.on('bildirim', (b) => {
+        document.getElementById('bildirimNokta').style.display = 'block';
+        if (bildirimlerYuklendi) {
+            if (bildirimPanel.querySelector('.bildirim-oge')?.textContent?.includes('Henüz bir etkinlik yok.')) bildirimPanel.innerHTML = '';
+            bildirimPanel.insertAdjacentHTML('afterbegin', `<div class="bildirim-oge fade-in">${b.metin}<div class="zaman">az önce</div></div>`);
+        }
+    });
+    <% } %>
+</script>
+</body>
+</html>

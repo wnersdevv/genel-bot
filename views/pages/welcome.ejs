@@ -1,0 +1,200 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">👋 Karşılama Sistemi</h1>
+<p class="sayfa-alt">Kanal karşılama, DM karşılama, ayrılış mesajı ve görsel kart ayarları.</p>
+
+<div id="icerik"><div class="iskelet" style="height:400px;"></div></div>
+
+<script>
+const GUILD_ID = '<%= guild.id %>';
+let AYAR = null, KANALLAR = [];
+
+function anahtarKutusu(id, etiket, deger) {
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+        <span>${etiket}</span>
+        <label class="anahtar"><input type="checkbox" id="${id}" ${deger ? 'checked' : ''}><span class="kaydirici"></span></label>
+    </div>`;
+}
+
+function kanalSecimi(id, secili) {
+    return `<select class="giris-select" id="${id}">
+        <option value="">— Kanal seçin —</option>
+        ${KANALLAR.filter(k => k.tip === 'metin').map(k => `<option value="${k.id}" ${k.id === secili ? 'selected' : ''}>#${k.isim}</option>`).join('')}
+    </select>`;
+}
+
+async function kaydet(guncelleme, dugme) {
+    const eskiMetin = dugme.textContent;
+    dugme.textContent = 'Kaydediliyor...';
+    dugme.disabled = true;
+    try {
+        AYAR = await window.wnersdevApi.gonder(`/api/guild/${GUILD_ID}/welcome`, 'PATCH', guncelleme);
+        dugme.textContent = '✅ Kaydedildi';
+        onizlemeGuncelle();
+    } catch (e) {
+        dugme.textContent = '❌ ' + e.message;
+    }
+    setTimeout(() => { dugme.textContent = eskiMetin; dugme.disabled = false; }, 1800);
+}
+
+function onizlemeGuncelle() {
+    const k = AYAR.kart;
+    const ornek = (m) => (m || '')
+        .replaceAll('{user}', '@<%= kullanici.username %>')
+        .replaceAll('{username}', '<%= kullanici.username %>')
+        .replaceAll('{displayName}', '<%= kullanici.username %>')
+        .replaceAll('{server}', '<%= guild.name %>')
+        .replaceAll('{serverName}', '<%= guild.name %>')
+        .replaceAll('{memberCount}', '<%= guild.memberCount %>');
+
+    document.getElementById('kartOnizleme').innerHTML = `
+        <div style="position:relative;width:100%;aspect-ratio:1000/400;border-radius:12px;overflow:hidden;
+                    background:${k.arkaPlanResmi ? `url('${k.arkaPlanResmi}') center/cover` : `linear-gradient(135deg, ${k.arkaPlanRengi}, ${k.gradyanRengi})`};
+                    display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    border:${k.kenarlikKalinligi}px solid ${k.kenarlikRengi};">
+            ${k.arkaPlanResmi ? `<div style="position:absolute;inset:0;background:rgba(0,0,0,${k.overlayOpaklik/100});"></div>` : ''}
+            <div style="position:relative;text-align:center;">
+                <img src="<%= kullanici.avatar ? `https://cdn.discordapp.com/avatars/${kullanici.id}/${kullanici.avatar}.png?size=256` : 'https://cdn.discordapp.com/embed/avatars/0.png' %>"
+                     style="width:${k.avatarBoyutu * 0.4}px;height:${k.avatarBoyutu * 0.4}px;border-radius:50%;border:4px solid ${k.kenarlikRengi};">
+                <div style="color:${k.metinRengi};font-weight:800;font-size:1.3rem;margin-top:10px;">${ornek(k.baslik)}</div>
+                <div style="color:${k.altMetinRengi};font-size:.9rem;margin-top:4px;">${ornek(k.altBaslik)}</div>
+            </div>
+        </div>
+        <p style="color:var(--text-muted);font-size:.78rem;margin-top:8px;">Bu bir tarayıcı önizlemesidir; Discord'a gönderilen kart canvas ile üretilir ve yazı tipi farklılık gösterebilir.</p>`;
+}
+
+async function yukle() {
+    try {
+        const [veri, kanallar] = await Promise.all([
+            window.wnersdevApi.al(`/api/guild/${GUILD_ID}/welcome`),
+            window.wnersdevApi.al(`/api/guild/${GUILD_ID}/kanallar`)
+        ]);
+        AYAR = veri.ayar;
+        KANALLAR = kanallar;
+
+        document.getElementById('icerik').innerHTML = `
+            <div class="kart" style="margin-bottom:16px;">
+                <h3 style="margin-top:0;">🖼️ Kart Önizleme</h3>
+                <div id="kartOnizleme"></div>
+            </div>
+
+            <div class="grid-2">
+                <div class="kart">
+                    <h3 style="margin-top:0;">💬 Kanal Karşılaması</h3>
+                    ${anahtarKutusu('kanalAktif', 'Aktif', AYAR.kanal.aktif)}
+                    ${anahtarKutusu('kartKullan', 'Görsel kart kullan', AYAR.kanal.kartKullan)}
+                    ${anahtarKutusu('embedKullan', 'Embed olarak gönder', AYAR.kanal.embedKullan)}
+                    <div class="form-alan"><label>Kanal</label>${kanalSecimi('kanalId', AYAR.kanal.kanalId)}</div>
+                    <div class="form-alan"><label>Mesaj</label><textarea class="giris-textarea" id="kanalMesaj" rows="3">${AYAR.kanal.mesaj}</textarea></div>
+                    <button class="buton" id="kanalKaydet">Kaydet</button>
+                    <button class="buton ikincil" id="testEt">🧪 Test Et</button>
+                </div>
+
+                <div class="kart">
+                    <h3 style="margin-top:0;">📨 DM Karşılaması</h3>
+                    ${anahtarKutusu('dmAktif', 'Aktif', AYAR.dm.aktif)}
+                    <div class="form-alan"><label>Başlık</label><input class="giris-input" id="dmBaslik" value="${AYAR.dm.baslik || ''}"></div>
+                    <div class="form-alan"><label>Mesaj</label><textarea class="giris-textarea" id="dmMesaj" rows="3">${AYAR.dm.mesaj}</textarea></div>
+                    <div class="form-alan"><label>Buton etiketi (opsiyonel)</label><input class="giris-input" id="dmButonEtiket" value="${AYAR.dm.butonEtiketi || ''}"></div>
+                    <div class="form-alan"><label>Buton bağlantısı</label><input class="giris-input" id="dmButonUrl" value="${AYAR.dm.butonUrl || ''}"></div>
+                    <button class="buton" id="dmKaydet">Kaydet</button>
+                </div>
+
+                <div class="kart">
+                    <h3 style="margin-top:0;">👋 Ayrılış Mesajı</h3>
+                    ${anahtarKutusu('ayrilisAktif', 'Aktif', AYAR.ayrilis.aktif)}
+                    <div class="form-alan"><label>Kanal</label>${kanalSecimi('ayrilisKanalId', AYAR.ayrilis.kanalId)}</div>
+                    <div class="form-alan"><label>Mesaj</label><textarea class="giris-textarea" id="ayrilisMesaj" rows="3">${AYAR.ayrilis.mesaj}</textarea></div>
+                    <button class="buton" id="ayrilisKaydet">Kaydet</button>
+                </div>
+
+                <div class="kart">
+                    <h3 style="margin-top:0;">🎨 Kart Tasarımı</h3>
+                    <div class="form-alan"><label>Başlık</label><input class="giris-input" id="kartBaslik" value="${AYAR.kart.baslik}"></div>
+                    <div class="form-alan"><label>Alt başlık</label><input class="giris-input" id="kartAltBaslik" value="${AYAR.kart.altBaslik}"></div>
+                    <div class="grid-2">
+                        <div class="form-alan"><label>Arka plan</label><input type="color" class="giris-input" id="kartArkaPlan" value="${AYAR.kart.arkaPlanRengi}"></div>
+                        <div class="form-alan"><label>Gradyan</label><input type="color" class="giris-input" id="kartGradyan" value="${AYAR.kart.gradyanRengi}"></div>
+                        <div class="form-alan"><label>Kenarlık</label><input type="color" class="giris-input" id="kartKenarlik" value="${AYAR.kart.kenarlikRengi}"></div>
+                        <div class="form-alan"><label>Metin</label><input type="color" class="giris-input" id="kartMetin" value="${AYAR.kart.metinRengi}"></div>
+                    </div>
+                    <div class="form-alan"><label>Avatar boyutu: <span id="avatarDeger">${AYAR.kart.avatarBoyutu}</span>px</label>
+                        <input type="range" id="kartAvatar" min="80" max="220" value="${AYAR.kart.avatarBoyutu}" style="width:100%;"></div>
+                    <div class="form-alan"><label>Arka plan resmi (https, png/jpg/webp)</label><input class="giris-input" id="kartResim" value="${AYAR.kart.arkaPlanResmi || ''}"></div>
+                    <button class="buton" id="kartKaydet">Kaydet</button>
+                </div>
+            </div>
+
+            <div class="kart" style="margin-top:16px;">
+                <h3 style="margin-top:0;">🔤 Değişkenler</h3>
+                <p style="color:var(--text-muted);font-size:.86rem;">${veri.yerTutucular.map(y => `<code>${y}</code>`).join(' · ')}</p>
+            </div>`;
+
+        onizlemeGuncelle();
+
+        // Canlı önizleme için tasarım alanlarını dinle
+        const canliAlanlar = {
+            kartBaslik: 'baslik', kartAltBaslik: 'altBaslik', kartArkaPlan: 'arkaPlanRengi',
+            kartGradyan: 'gradyanRengi', kartKenarlik: 'kenarlikRengi', kartMetin: 'metinRengi',
+            kartResim: 'arkaPlanResmi'
+        };
+        Object.entries(canliAlanlar).forEach(([id, alan]) => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                AYAR.kart[alan] = e.target.value || null;
+                onizlemeGuncelle();
+            });
+        });
+        document.getElementById('kartAvatar').addEventListener('input', (e) => {
+            AYAR.kart.avatarBoyutu = Number(e.target.value);
+            document.getElementById('avatarDeger').textContent = e.target.value;
+            onizlemeGuncelle();
+        });
+
+        document.getElementById('kanalKaydet').addEventListener('click', (e) => kaydet({
+            'kanal.aktif': document.getElementById('kanalAktif').checked,
+            'kanal.kanalId': document.getElementById('kanalId').value || null,
+            'kanal.mesaj': document.getElementById('kanalMesaj').value,
+            'kanal.kartKullan': document.getElementById('kartKullan').checked,
+            'kanal.embedKullan': document.getElementById('embedKullan').checked
+        }, e.target));
+
+        document.getElementById('dmKaydet').addEventListener('click', (e) => kaydet({
+            'dm.aktif': document.getElementById('dmAktif').checked,
+            'dm.baslik': document.getElementById('dmBaslik').value,
+            'dm.mesaj': document.getElementById('dmMesaj').value,
+            'dm.butonEtiketi': document.getElementById('dmButonEtiket').value || null,
+            'dm.butonUrl': document.getElementById('dmButonUrl').value || null
+        }, e.target));
+
+        document.getElementById('ayrilisKaydet').addEventListener('click', (e) => kaydet({
+            'ayrilis.aktif': document.getElementById('ayrilisAktif').checked,
+            'ayrilis.kanalId': document.getElementById('ayrilisKanalId').value || null,
+            'ayrilis.mesaj': document.getElementById('ayrilisMesaj').value
+        }, e.target));
+
+        document.getElementById('kartKaydet').addEventListener('click', (e) => kaydet({
+            'kart.baslik': document.getElementById('kartBaslik').value,
+            'kart.altBaslik': document.getElementById('kartAltBaslik').value,
+            'kart.arkaPlanRengi': document.getElementById('kartArkaPlan').value,
+            'kart.gradyanRengi': document.getElementById('kartGradyan').value,
+            'kart.kenarlikRengi': document.getElementById('kartKenarlik').value,
+            'kart.metinRengi': document.getElementById('kartMetin').value,
+            'kart.avatarBoyutu': Number(document.getElementById('kartAvatar').value),
+            'kart.arkaPlanResmi': document.getElementById('kartResim').value || null
+        }, e.target));
+
+        document.getElementById('testEt').addEventListener('click', async (e) => {
+            e.target.textContent = 'Gönderiliyor...';
+            e.target.disabled = true;
+            try {
+                await window.wnersdevApi.gonder(`/api/guild/${GUILD_ID}/welcome/test`, 'POST', {});
+                e.target.textContent = '✅ Gönderildi';
+            } catch (err) { e.target.textContent = '❌ ' + err.message; }
+            setTimeout(() => { e.target.textContent = '🧪 Test Et'; e.target.disabled = false; }, 2000);
+        });
+    } catch {
+        document.getElementById('icerik').innerHTML = '<div class="hata-kutusu">❌ Ayarlar yüklenemedi. <button class="buton" onclick="yukle()">Tekrar Dene</button></div>';
+    }
+}
+yukle();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

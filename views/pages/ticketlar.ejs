@@ -1,0 +1,36 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🎫 Ticket Sistemi</h1>
+<p class="sayfa-alt">Açık, kilitli ve kapalı ticketların gerçek zamanlı durumu.</p>
+
+<div class="grid" id="ticketKartlari">
+    <div class="kart istatistik-kart"><div class="baslik">🟢 Açık</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🔒 Kilitli</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">⚫ Kapalı</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">⏱️ Ort. Çözüm Süresi</div><div class="deger iskelet" style="height:32px;width:80px;">&nbsp;</div></div>
+</div>
+
+<div class="tablo-sarici" style="margin-top:20px;">
+    <table class="tablo">
+        <thead><tr><th>No</th><th>Kategori</th><th>Sahip</th><th>Durum</th><th>Açılış</th></tr></thead>
+        <tbody id="ticketTablo"><tr><td colspan="5">Yükleniyor...</td></tr></tbody>
+    </table>
+</div>
+
+<script>
+(async () => {
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/ticketler');
+        const kartlar = document.querySelectorAll('#ticketKartlari .deger');
+        const degerler = [veri.acik, veri.kilitli, veri.kapali, veri.ortalamaCozumDk + ' dk'];
+        kartlar.forEach((el, i) => { el.classList.remove('iskelet'); el.style = ''; el.textContent = degerler[i]; });
+
+        const DURUM_ROZET = { acik: 'rozet-yesil', kilitli: 'rozet-sari', kapali: 'rozet-kirmizi' };
+        document.getElementById('ticketTablo').innerHTML = veri.sonTicketlar.length
+            ? veri.sonTicketlar.map(t => `<tr><td>#${t.ticketNo}</td><td>${t.kategori}</td><td>${t.sahipId}</td><td><span class="rozet ${DURUM_ROZET[t.durum]}">${t.durum}</span></td><td>${window.wnersdevApi.zamanOnce(t.createdAt)}</td></tr>`).join('')
+            : '<tr><td colspan="5">Henüz ticket yok.</td></tr>';
+    } catch {
+        document.getElementById('ticketTablo').innerHTML = '<tr><td colspan="5">❌ Yüklenemedi. <button class="buton ikincil" onclick="location.reload()">Tekrar Dene</button></td></tr>';
+    }
+})();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

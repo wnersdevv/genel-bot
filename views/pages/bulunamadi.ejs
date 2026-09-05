@@ -1,0 +1,12 @@
+<%- include('../partials/kabukBasla', { guild: null, aktif: '', sayfaBaslik: 'Sayfa Bulunamadı', kullanici, config }) %>
+<div class="hata-kutusu">
+    <div style="font-size:4rem;margin-bottom:8px;">🔍</div>
+    <h2 style="margin:0 0 8px;">404 — Sayfa Bulunamadı</h2>
+    <p style="max-width:480px;margin:0 auto 20px;">Aradığınız sayfa taşınmış veya hiç var olmamış olabilir.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a class="buton" href="/">🏠 Ana Sayfa</a>
+        <a class="buton ikincil" href="/komutlar">📖 Komutlar</a>
+        <a class="buton ikincil" href="/durum">📡 Durum</a>
+    </div>
+</div>
+<%- include('../partials/kabukBitir', { guild: null }) %>

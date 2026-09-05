@@ -1,0 +1,33 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🎉 Çekilişler</h1>
+<p class="sayfa-alt">Aktif ve geçmiş çekilişler.</p>
+
+<div class="grid" id="cekilisKartlari">
+    <div class="kart istatistik-kart"><div class="baslik">🟢 Aktif</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">⚫ Bitmiş</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+</div>
+
+<div class="tablo-sarici" style="margin-top:20px;">
+    <table class="tablo">
+        <thead><tr><th>Ödül</th><th>Katılımcı</th><th>Kazanan Sayısı</th><th>Durum</th><th>Bitiş</th></tr></thead>
+        <tbody id="cekilisTablo"><tr><td colspan="5">Yükleniyor...</td></tr></tbody>
+    </table>
+</div>
+
+<script>
+(async () => {
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/cekilisler');
+        const kartlar = document.querySelectorAll('#cekilisKartlari .deger');
+        [veri.aktif, veri.bitmis].forEach((d, i) => { kartlar[i].classList.remove('iskelet'); kartlar[i].style = ''; kartlar[i].textContent = d; });
+
+        const DURUM_ROZET = { aktif: 'rozet-yesil', bitti: 'rozet-mor', iptal: 'rozet-kirmizi' };
+        document.getElementById('cekilisTablo').innerHTML = veri.liste.length
+            ? veri.liste.map(c => `<tr><td>${c.odul}</td><td>${c.katilimcilar.length}</td><td>${c.kazananSayisi}</td><td><span class="rozet ${DURUM_ROZET[c.durum]}">${c.durum}</span></td><td>${window.wnersdevApi.zamanOnce(c.bitisZamani)}</td></tr>`).join('')
+            : '<tr><td colspan="5">Henüz çekiliş yok.</td></tr>';
+    } catch {
+        document.getElementById('cekilisTablo').innerHTML = '<tr><td colspan="5">❌ Yüklenemedi.</td></tr>';
+    }
+})();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

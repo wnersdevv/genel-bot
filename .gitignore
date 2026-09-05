@@ -1,0 +1,7 @@
+node_modules/
+ayarlar.json
+logs/*.log
+dashboard/sessions/
+*.log
+.DS_Store
+npm-debug.log*

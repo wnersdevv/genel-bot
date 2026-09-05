@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 260" width="640" height="260" role="img" aria-label="Komut kullanım animasyonu">
+  <style>
+    .kutu { fill: #1e1f2e; }
+    .cerceve { fill: none; stroke: #5865F2; stroke-width: 2; rx: 10; }
+    .metin { font-family: 'Consolas','Fira Code',monospace; font-size: 15px; fill: #eef0f7; }
+    .soluk { fill: #9096ac; }
+    .yesil { fill: #57F287; }
+    .mor { fill: #5865F2; }
+    .imlec { fill: #5865F2; }
+
+    .yaz1 { animation: yaz 9s steps(1) infinite; }
+    .cikti { opacity: 0; animation: belir 9s ease infinite; }
+    .cikti2 { opacity: 0; animation: belir2 9s ease infinite; }
+    .imlec { animation: yanip 1s steps(2) infinite; }
+
+    @keyframes yaz {
+      0%,5% { opacity: 0; } 6%,100% { opacity: 1; }
+    }
+    @keyframes belir {
+      0%,32% { opacity: 0; transform: translateY(6px); }
+      38%,92% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; }
+    }
+    @keyframes belir2 {
+      0%,52% { opacity: 0; transform: translateY(6px); }
+      58%,92% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; }
+    }
+    @keyframes yanip { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+  </style>
+
+  <rect class="kutu" width="640" height="260" rx="12"/>
+  <rect class="cerceve" x="1" y="1" width="638" height="258"/>
+
+  <circle cx="24" cy="24" r="5" fill="#ED4245"/>
+  <circle cx="42" cy="24" r="5" fill="#FEE75C"/>
+  <circle cx="60" cy="24" r="5" fill="#57F287"/>
+  <text x="82" y="29" class="metin soluk" font-size="13">#genel</text>
+
+  <line x1="0" y1="44" x2="640" y2="44" stroke="#2b2d3e" stroke-width="1"/>
+
+  <!-- Yazılan komut -->
+  <g class="yaz1">
+    <text x="24" y="82" class="metin soluk">kullanıcı</text>
+    <text x="24" y="106" class="metin mor">/uyar</text>
+    <text x="76" y="106" class="metin">kullanıcı:</text>
+    <text x="158" y="106" class="metin yesil">@Ahmet</text>
+    <text x="232" y="106" class="metin">sebep:</text>
+    <text x="286" y="106" class="metin">Kural ihlali</text>
+    <rect class="imlec" x="392" y="94" width="8" height="16"/>
+  </g>
+
+  <!-- Bot yanıtı -->
+  <g class="cikti">
+    <rect x="24" y="126" width="592" height="58" rx="8" fill="#2b2d3e"/>
+    <rect x="24" y="126" width="4" height="58" fill="#57F287"/>
+    <text x="42" y="150" class="metin yesil">✅ Kullanıcı Uyarıldı</text>
+    <text x="42" y="172" class="metin soluk" font-size="13">Ahmet uyarıldı · Case #47 · Sebep: Kural ihlali</text>
+  </g>
+
+  <!-- İkinci yanıt -->
+  <g class="cikti2">
+    <rect x="24" y="194" width="592" height="42" rx="8" fill="#2b2d3e"/>
+    <rect x="24" y="194" width="4" height="42" fill="#5865F2"/>
+    <text x="42" y="220" class="metin soluk" font-size="13">📋 Moderasyon kanalına kaydedildi · Kullanıcıya DM gönderildi</text>
+  </g>
+</svg>

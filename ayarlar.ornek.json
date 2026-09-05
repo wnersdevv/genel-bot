@@ -1,0 +1,14 @@
+{
+    "token": "BURAYA_DISCORD_BOT_TOKEN_YAZ",
+    "clientId": "BURAYA_CLIENT_ID_YAZ",
+    "guildId": "",
+    "mongodbUri": "BURAYA_MONGODB_BAGLANTI_ADRESI_YAZ",
+    "varsayilanPrefix": "!",
+    "dashboardUrl": "http://localhost:3000",
+    "dashboardPort": 3000,
+    "discordClientSecret": "BURAYA_OAUTH2_CLIENT_SECRET_YAZ",
+    "sessionSecret": "rastgele-uzun-bir-gizli-anahtar",
+    "developerIds": [],
+    "destekSunucusu": "https://discord.gg/wnerscode",
+    "ortam": "development"
+}

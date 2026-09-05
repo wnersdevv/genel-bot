@@ -1,0 +1,40 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🎭 Roller &amp; Kanallar</h1>
+<p class="sayfa-alt">Sunucunun rol ve kanal yapısı.</p>
+
+<div class="grid-2">
+    <div>
+        <div class="baslik" style="font-weight:700;margin-bottom:10px;">🎭 Roller</div>
+        <div class="tablo-sarici"><table class="tablo">
+            <thead><tr><th>Rol</th><th>Üye</th></tr></thead>
+            <tbody id="rolTablo"><tr><td colspan="2">Yükleniyor...</td></tr></tbody>
+        </table></div>
+    </div>
+    <div>
+        <div class="baslik" style="font-weight:700;margin-bottom:10px;">📢 Kanallar</div>
+        <div class="tablo-sarici"><table class="tablo">
+            <thead><tr><th>Kanal</th><th>Tür</th></tr></thead>
+            <tbody id="kanalTablo"><tr><td colspan="2">Yükleniyor...</td></tr></tbody>
+        </table></div>
+    </div>
+</div>
+
+<script>
+(async () => {
+    try {
+        const roller = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/roller');
+        document.getElementById('rolTablo').innerHTML = roller.map(r =>
+            `<tr><td><span style="color:${r.renk !== '#000000' ? r.renk : 'var(--text)'}">●</span> ${r.isim}</td><td>${r.üyeSayısı}</td></tr>`
+        ).join('') || '<tr><td colspan="2">Rol yok.</td></tr>';
+    } catch { document.getElementById('rolTablo').innerHTML = '<tr><td colspan="2">❌ Yüklenemedi.</td></tr>'; }
+
+    try {
+        const kanallar = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/kanallar');
+        const IKON = { metin: '#️⃣', ses: '🔊', kategori: '📁', duyuru: '📢', sahne: '🎙️', forum: '💬', diğer: '❔' };
+        document.getElementById('kanalTablo').innerHTML = kanallar.map(k =>
+            `<tr><td>${IKON[k.tip] || '❔'} ${k.isim}</td><td>${k.tip}</td></tr>`
+        ).join('') || '<tr><td colspan="2">Kanal yok.</td></tr>';
+    } catch { document.getElementById('kanalTablo').innerHTML = '<tr><td colspan="2">❌ Yüklenemedi.</td></tr>'; }
+})();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

@@ -1,0 +1,48 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">📈 Analitik</h1>
+<p class="sayfa-alt">Ekonomi, seviye ve tag verilerine dair gerçek özet.</p>
+
+<div class="grid" id="analitikKartlari">
+    <div class="kart istatistik-kart"><div class="baslik">💰 Ekonomiye Kayıtlı Kullanıcı</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">⭐ XP Kazanan Kullanıcı</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🏷️ Toplam Tag</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+</div>
+
+<div class="grid-2" style="margin-top:20px;">
+    <div>
+        <div class="baslik" style="font-weight:700;margin-bottom:10px;">💰 En Zenginler</div>
+        <div class="tablo-sarici"><table class="tablo"><thead><tr><th>Kullanıcı</th><th>Cüzdan</th></tr></thead>
+        <tbody id="zenginlerTablo"><tr><td colspan="2">Yükleniyor...</td></tr></tbody></table></div>
+    </div>
+    <div>
+        <div class="baslik" style="font-weight:700;margin-bottom:10px;">⭐ Seviye Liderlik Tablosu</div>
+        <div class="tablo-sarici"><table class="tablo"><thead><tr><th>Kullanıcı</th><th>Seviye</th></tr></thead>
+        <tbody id="seviyeTablo"><tr><td colspan="2">Yükleniyor...</td></tr></tbody></table></div>
+    </div>
+</div>
+
+<script>
+(async () => {
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/analitik');
+        const kartlar = document.querySelectorAll('#analitikKartlari .deger');
+        [veri.ekonomiKullaniciSayisi, veri.xpKazananKullaniciSayisi, veri.tagSayisi].forEach((d, i) => { kartlar[i].classList.remove('iskelet'); kartlar[i].style = ''; kartlar[i].textContent = d; });
+
+        document.getElementById('zenginlerTablo').innerHTML = veri.enZenginler.length
+            ? veri.enZenginler.map(e => `<tr><td>${e.kullaniciId}</td><td>${window.wnersdevApi.sayiFormat(e.cuzdan)}</td></tr>`).join('')
+            : '<tr><td colspan="2">Veri yok.</td></tr>';
+    } catch {
+        document.getElementById('analitikKartlari').innerHTML = '<div class="hata-kutusu">❌ Yüklenemedi.</div>';
+    }
+
+    try {
+        const liderlik = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/seviye-liderlik');
+        document.getElementById('seviyeTablo').innerHTML = liderlik.length
+            ? liderlik.map(s => `<tr><td>${s.kullaniciId}</td><td>${s.seviye}</td></tr>`).join('')
+            : '<tr><td colspan="2">Veri yok.</td></tr>';
+    } catch {
+        document.getElementById('seviyeTablo').innerHTML = '<tr><td colspan="2">❌ Yüklenemedi.</td></tr>';
+    }
+})();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

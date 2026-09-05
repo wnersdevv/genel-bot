@@ -1,0 +1,65 @@
+<%- include('../partials/kabukBasla', { guild: null, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🩺 Sistem Sağlığı</h1>
+<p class="sayfa-alt">wnersdev'in gerçek zamanlı çalışma durumu. <span id="canliRozet"></span></p>
+
+<div class="grid" id="durumKartlari">
+    <div class="kart"><div class="baslik" style="color:var(--text-muted);">Discord API</div><div id="dDiscord" class="iskelet" style="height:22px;width:100px;">&nbsp;</div></div>
+    <div class="kart"><div class="baslik" style="color:var(--text-muted);">MongoDB</div><div id="dMongo" class="iskelet" style="height:22px;width:100px;">&nbsp;</div></div>
+    <div class="kart"><div class="baslik" style="color:var(--text-muted);">Dashboard</div><div><span class="durum-noktasi durum-yesil"></span>Online</div></div>
+</div>
+
+<div class="grid-2" style="margin-top:20px;">
+    <div class="kart">
+        <div class="baslik" style="font-weight:700;margin-bottom:12px;">📊 Genel</div>
+        <div id="genelBilgi" class="iskelet" style="height:180px;"></div>
+    </div>
+    <div class="kart">
+        <div class="baslik" style="font-weight:700;margin-bottom:12px;">🧰 Ortam</div>
+        <div id="ortamBilgi" class="iskelet" style="height:180px;"></div>
+    </div>
+</div>
+
+<script>
+function satir(etiket, deger) {
+    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.88rem;"><span style="color:var(--text-muted);">${etiket}</span><span>${deger}</span></div>`;
+}
+
+function ekranaBasYaz(d) {
+    document.getElementById('dDiscord').innerHTML = `<span class="durum-noktasi ${d.discordOnline ? 'durum-yesil' : 'durum-kirmizi'}"></span>${d.discordOnline ? 'Online' : 'Offline'} (${d.discordPing}ms)`;
+    document.getElementById('dMongo').innerHTML = `<span class="durum-noktasi ${d.mongoBagliMi ? 'durum-yesil' : 'durum-kirmizi'}"></span>${d.mongoDurum}`;
+
+    const saat = Math.floor(d.uptimeSaniye / 3600);
+    const dk = Math.floor((d.uptimeSaniye % 3600) / 60);
+
+    document.getElementById('genelBilgi').innerHTML = `
+        ${satir('Sunucu Sayısı', window.wnersdevApi.sayiFormat(d.guildSayisi))}
+        ${satir('Toplam Kullanıcı', window.wnersdevApi.sayiFormat(d.kullaniciSayisi))}
+        ${satir('Slash Komut', d.slashKomutSayisi)}
+        ${satir('Prefix Komut', d.prefixKomutSayisi)}
+        ${satir('Çalışma Süresi', `${saat}sa ${dk}dk`)}
+    `;
+
+    document.getElementById('ortamBilgi').innerHTML = `
+        ${satir('Node.js', d.nodeVersiyon)}
+        ${satir('discord.js', 'v' + d.discordJsVersiyon)}
+        ${satir('RAM Kullanımı', `${d.ramKullanimMB} MB / ${d.ramToplamMB} MB`)}
+        ${satir('Sistem Yükü (1dk)', d.yukOrtalamasi ?? 'N/A')}
+    `;
+}
+
+// İlk yüklemede REST üzerinden anında veri çek (skeleton'ı hemen doldurmak için)
+(async () => {
+    try {
+        ekranaBasYaz(await window.wnersdevApi.al('/api/bot/durum'));
+    } catch {
+        document.getElementById('durumKartlari').innerHTML = '<div class="hata-kutusu">❌ Durum alınamadı. <button class="buton" onclick="location.reload()">Tekrar Dene</button></div>';
+    }
+})();
+
+// Ardından Socket.IO üzerinden gerçek zamanlı (push) güncellemelere geç
+const soket = io({ path: '/soket' });
+soket.on('botDurum', ekranaBasYaz);
+soket.on('connect', () => document.getElementById('canliRozet').innerHTML = '<span class="rozet rozet-yesil">🟢 Canlı</span>');
+soket.on('disconnect', () => document.getElementById('canliRozet').innerHTML = '<span class="rozet rozet-kirmizi">🔴 Bağlantı koptu</span>');
+</script>
+<%- include('../partials/kabukBitir', { guild: null }) %>

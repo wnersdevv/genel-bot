@@ -1,0 +1,192 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">📝 Komutlar</h1>
+<p class="sayfa-alt">Bir komuta tıklayarak kullanımını, parametrelerini ve örneğini görebilirsiniz.</p>
+
+<div class="grid" id="komutOzet" style="margin-bottom:18px;">
+    <div class="kart istatistik-kart"><div class="baslik">📦 Toplam Komut</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">⚡ Slash Komut</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">⌨️ Sadece Prefix</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🔴 Kapalı Komut</div><div class="deger iskelet" style="height:32px;width:50px;">&nbsp;</div></div>
+</div>
+
+<div class="grid-2" style="margin-bottom:16px;">
+    <input class="giris-input" id="komutArama" placeholder="🔎 Komut adı veya açıklamada ara...">
+    <div style="display:flex; gap:8px;">
+        <select class="giris-select" id="kategoriFiltre"><option value="">Tüm Kategoriler</option></select>
+        <select class="giris-select" id="turFiltre">
+            <option value="">Tümü</option>
+            <option value="slash">Slash</option>
+            <option value="prefix">Sadece Prefix</option>
+            <option value="kapali">Kapalı</option>
+        </select>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div>
+        <div class="tablo-sarici">
+            <table class="tablo">
+                <thead><tr><th>Durum</th><th>Komut</th><th>Kategori</th><th>Cooldown</th></tr></thead>
+                <tbody id="komutTablo"><tr><td colspan="4">Yükleniyor...</td></tr></tbody>
+            </table>
+        </div>
+        <p id="sayacMetni" style="color:var(--text-muted);font-size:.8rem;margin-top:8px;"></p>
+    </div>
+
+    <div class="kart" id="detayPanel" style="position:sticky; top:80px; align-self:start;">
+        <p style="color:var(--text-muted);">👈 Detaylarını görmek için soldan bir komut seçin.</p>
+    </div>
+</div>
+
+<script>
+const GUILD_ID = '<%= guild.id %>';
+let TUM_KOMUTLAR = [];
+let PREFIX = '!';
+
+function ozetGuncelle() {
+    const kartlar = document.querySelectorAll('#komutOzet .deger');
+    const degerler = [
+        TUM_KOMUTLAR.length,
+        TUM_KOMUTLAR.filter(k => k.slashMi).length,
+        TUM_KOMUTLAR.filter(k => !k.slashMi).length,
+        TUM_KOMUTLAR.filter(k => !k.aktif).length
+    ];
+    kartlar.forEach((el, i) => { el.classList.remove('iskelet'); el.style = ''; el.textContent = degerler[i]; });
+}
+
+function detayGoster(komut) {
+    const parametreHtml = komut.parametreler.length
+        ? komut.parametreler.map(p => `
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+                <code>${p.isim}</code>
+                <span class="rozet ${p.zorunlu ? 'rozet-kirmizi' : 'rozet-mor'}">${p.zorunlu ? 'zorunlu' : 'opsiyonel'}</span>
+                <span class="rozet rozet-sari">${p.tip}</span>
+                <div style="color:var(--text-muted);font-size:.82rem;margin-top:4px;">${p.açıklama}</div>
+                ${p.seçenekler.length ? `<div style="font-size:.78rem;margin-top:4px;">Seçenekler: ${p.seçenekler.map(s => `<code>${s}</code>`).join(', ')}</div>` : ''}
+            </div>`).join('')
+        : '<p style="color:var(--text-muted);font-size:.85rem;">Bu komut parametre almıyor.</p>';
+
+    document.getElementById('detayPanel').innerHTML = `
+        <h3 style="margin:0 0 4px;">${komut.slashMi ? '/' : PREFIX}${komut.isim}</h3>
+        <p style="color:var(--text-muted);margin:0 0 12px;">${komut.açıklama}</p>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+            <span class="rozet rozet-mor">${komut.kategori}</span>
+            ${komut.slashMi ? '<span class="rozet rozet-yesil">⚡ Slash + Prefix</span>' : '<span class="rozet rozet-sari">⌨️ Sadece Prefix</span>'}
+            ${komut.aktif ? '' : '<span class="rozet rozet-kirmizi">🔴 Kapalı</span>'}
+            ${komut.geliştiriciKomutuMu ? '<span class="rozet rozet-kirmizi">DEV</span>' : ''}
+        </div>
+
+        <div style="margin-bottom:12px;">
+            <div style="font-size:.78rem;color:var(--text-muted);font-weight:600;margin-bottom:4px;">KULLANIM</div>
+            <code style="display:block;background:var(--background);padding:10px;border-radius:8px;font-size:.85rem;">${komut.slashMi ? '/' : PREFIX}${komut.kullanım}</code>
+        </div>
+
+        <div style="margin-bottom:12px;">
+            <div style="font-size:.78rem;color:var(--text-muted);font-weight:600;margin-bottom:4px;">ÖRNEK</div>
+            <code style="display:block;background:var(--background);padding:10px;border-radius:8px;font-size:.85rem;">${komut.örnek}</code>
+        </div>
+
+        ${komut.aliaslar.length ? `
+        <div style="margin-bottom:12px;">
+            <div style="font-size:.78rem;color:var(--text-muted);font-weight:600;margin-bottom:4px;">KISAYOLLAR</div>
+            ${komut.aliaslar.map(a => `<code>${PREFIX}${a}</code>`).join(' ')}
+        </div>` : ''}
+
+        <div style="margin-bottom:12px;">
+            <div style="font-size:.78rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;">PARAMETRELER</div>
+            ${parametreHtml}
+        </div>
+
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-muted);padding-top:10px;border-top:1px solid var(--border);">
+            <span>🔐 ${komut.gerekliYetki}</span>
+            <span>⏱️ ${komut.cooldown}sn</span>
+        </div>
+    `;
+}
+
+function ciz(liste) {
+    document.getElementById('komutTablo').innerHTML = liste.length ? liste.map(k => `
+        <tr data-isim="${k.isim}" style="cursor:pointer;">
+            <td onclick="event.stopPropagation()">
+                <label class="anahtar">
+                    <input type="checkbox" class="komut-aktif" data-isim="${k.isim}" ${k.aktif ? 'checked' : ''}>
+                    <span class="kaydirici"></span>
+                </label>
+            </td>
+            <td>${k.slashMi ? '⚡' : '⌨️'} ${k.isim}</td>
+            <td><span class="rozet rozet-mor">${k.kategori}</span></td>
+            <td onclick="event.stopPropagation()">
+                <input type="number" class="giris-input komut-cooldown" data-isim="${k.isim}" value="${k.cooldown}" min="0" max="600" style="width:70px;">
+            </td>
+        </tr>`).join('') : '<tr><td colspan="4">Sonuç bulunamadı.</td></tr>';
+
+    document.getElementById('sayacMetni').textContent = `${liste.length} / ${TUM_KOMUTLAR.length} komut gösteriliyor`;
+
+    document.querySelectorAll('#komutTablo tr[data-isim]').forEach(satir => {
+        satir.addEventListener('click', () => {
+            const komut = TUM_KOMUTLAR.find(k => k.isim === satir.dataset.isim);
+            if (komut) detayGoster(komut);
+        });
+    });
+
+    document.querySelectorAll('.komut-aktif').forEach(kutu => {
+        kutu.addEventListener('change', async () => {
+            try {
+                await window.wnersdevApi.gonder(`/api/guild/${GUILD_ID}/komutlar/${encodeURIComponent(kutu.dataset.isim)}`, 'PATCH', { aktif: kutu.checked });
+                const komut = TUM_KOMUTLAR.find(k => k.isim === kutu.dataset.isim);
+                if (komut) komut.aktif = kutu.checked;
+                ozetGuncelle();
+            } catch (e) { alert('Kaydedilemedi: ' + e.message); kutu.checked = !kutu.checked; }
+        });
+    });
+
+    document.querySelectorAll('.komut-cooldown').forEach(girdi => {
+        let zamanlayici;
+        girdi.addEventListener('input', () => {
+            clearTimeout(zamanlayici);
+            zamanlayici = setTimeout(async () => {
+                try {
+                    await window.wnersdevApi.gonder(`/api/guild/${GUILD_ID}/komutlar/${encodeURIComponent(girdi.dataset.isim)}`, 'PATCH', { cooldownSn: parseInt(girdi.value, 10) || 0 });
+                } catch (e) { alert('Kaydedilemedi: ' + e.message); }
+            }, 500);
+        });
+    });
+}
+
+function filtrele() {
+    const arama = document.getElementById('komutArama').value.toLowerCase();
+    const kategori = document.getElementById('kategoriFiltre').value;
+    const tur = document.getElementById('turFiltre').value;
+
+    ciz(TUM_KOMUTLAR.filter(k => {
+        if (kategori && k.kategori !== kategori) return false;
+        if (tur === 'slash' && !k.slashMi) return false;
+        if (tur === 'prefix' && k.slashMi) return false;
+        if (tur === 'kapali' && k.aktif) return false;
+        return k.isim.toLowerCase().includes(arama) || k.açıklama.toLowerCase().includes(arama);
+    }));
+}
+
+(async () => {
+    try {
+        const veri = await window.wnersdevApi.al(`/api/guild/${GUILD_ID}/komutlar`);
+        TUM_KOMUTLAR = veri.komutlar;
+        PREFIX = veri.prefix;
+
+        ozetGuncelle();
+        ciz(TUM_KOMUTLAR);
+
+        const kategoriler = [...new Set(TUM_KOMUTLAR.map(k => k.kategori))].sort();
+        const secim = document.getElementById('kategoriFiltre');
+        kategoriler.forEach(k => secim.insertAdjacentHTML('beforeend', `<option value="${k}">${k}</option>`));
+    } catch {
+        document.getElementById('komutTablo').innerHTML = '<tr><td colspan="4">❌ Yüklenemedi. <button class="buton ikincil" onclick="location.reload()">Tekrar Dene</button></td></tr>';
+    }
+})();
+
+document.getElementById('komutArama').addEventListener('input', filtrele);
+document.getElementById('kategoriFiltre').addEventListener('change', filtrele);
+document.getElementById('turFiltre').addEventListener('change', filtrele);
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

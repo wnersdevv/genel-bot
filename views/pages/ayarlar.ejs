@@ -1,0 +1,106 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">⚙️ Sunucu Ayarları</h1>
+<p class="sayfa-alt">Değişiklikler MongoDB'ye anında kaydedilir ve bot ile senkron çalışır.</p>
+
+<div id="ayarlarIcerik">
+    <div class="iskelet" style="height:300px;"></div>
+</div>
+
+<script>
+const GUILD_ID = '<%= guild.id %>';
+let AYAR = null;
+
+const MODUL_ETIKETLERI = {
+    moderasyon: '🛡️ Moderasyon', koruma: '🔐 Koruma', mesajFiltreleme: '🧹 Mesaj Filtreleme',
+    ticket: '🎫 Ticket', müzik: '🎵 Müzik', eğlence: '🎮 Eğlence', ekonomi: '💰 Ekonomi',
+    seviye: '⭐ Seviye', çekiliş: '🎉 Çekiliş', öneri: '💡 Öneri', özelOda: '🏠 Özel Oda',
+    hoşgeldin: '👋 Hoş Geldin', güleGüle: '👋 Güle Güle', otoRol: '🎭 Otorol', starboard: '🌟 Starboard',
+    afk: '💤 AFK', doğumGünü: '🎂 Doğum Günü', itibar: '🏅 İtibar', tag: '🏷️ Tag',
+    otomatikCevap: '🤖 Otomatik Cevap', hatırlatıcı: '⏰ Hatırlatıcı', duyuru: '📢 Duyuru',
+    rolMenü: '🎭 Rol Menüsü', backup: '💾 Backup', log: '📋 Log'
+};
+
+function modulSatiri(anahtar, aktifMi) {
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <span>${MODUL_ETIKETLERI[anahtar] || anahtar}</span>
+        <label class="anahtar"><input type="checkbox" data-modul="${anahtar}" ${aktifMi ? 'checked' : ''}><span class="kaydirici"></span></label>
+    </div>`;
+}
+
+async function yukle() {
+    try {
+        AYAR = await window.wnersdevApi.al('/api/guild/' + GUILD_ID);
+        document.getElementById('ayarlarIcerik').innerHTML = `
+            <div class="grid-2">
+                <div class="kart">
+                    <div class="baslik" style="font-weight:700;margin-bottom:12px;">🧩 Modüller</div>
+                    <div id="modulListesi">${Object.entries(AYAR.modüller).map(([k, v]) => modulSatiri(k, v)).join('')}</div>
+                </div>
+
+                <div class="kart">
+                    <div class="baslik" style="font-weight:700;margin-bottom:12px;">🔧 Genel</div>
+                    <div class="form-alan"><label>Prefix</label><input class="giris-input" id="ayarPrefix" value="${AYAR.prefix}"></div>
+                    <div class="form-alan"><label>Dil</label>
+                        <select class="giris-select" id="ayarDil"><option value="tr" ${AYAR.dil === 'tr' ? 'selected' : ''}>Türkçe</option><option value="en" ${AYAR.dil === 'en' ? 'selected' : ''}>English</option></select>
+                    </div>
+                    <div class="baslik" style="font-weight:700;margin:18px 0 12px;">💰 Ekonomi</div>
+                    <div class="form-alan"><label>Para Birimi Simgesi</label><input class="giris-input" id="ayarParaBirimi" value="${AYAR.ekonomiAyar?.paraBirimi || '💰'}"></div>
+                    <div class="form-alan"><label>Günlük Ödül Miktarı</label><input class="giris-input" type="number" id="ayarGunlukMiktar" value="${AYAR.ekonomiAyar?.günlükMiktar || 250}"></div>
+                    <button class="buton" id="genelKaydet">Kaydet</button>
+                    <span id="genelSonuc" style="margin-left:10px;font-size:.85rem;"></span>
+                </div>
+            </div>
+
+            <div class="kart" style="margin-top:16px;">
+                <div class="baslik" style="font-weight:700;margin-bottom:12px;">👋 Hoş Geldin Mesajı</div>
+                <div class="form-alan"><label>Mesaj (değişkenler: {üye} {sunucu} {üyeSayısı} {kullanıcıAdı})</label>
+                    <textarea class="giris-textarea" id="ayarHosgeldinMesaj" rows="2">${AYAR.hoşgeldinMesaj?.icerik || ''}</textarea>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;font-size:.88rem;">
+                    <input type="checkbox" id="ayarHosgeldinCanvas" ${AYAR.hoşgeldinMesaj?.canvasAktif ? 'checked' : ''}> Canvas kartı kullan
+                </label>
+                <button class="buton" id="hosgeldinKaydet" style="margin-top:12px;">Kaydet</button>
+                <span id="hosgeldinSonuc" style="margin-left:10px;font-size:.85rem;"></span>
+            </div>
+        `;
+
+        document.querySelectorAll('#modulListesi input[type=checkbox]').forEach(kutu => {
+            kutu.addEventListener('change', async () => {
+                try {
+                    await window.wnersdevApi.gonder('/api/guild/' + GUILD_ID, 'PATCH', { [`modüller.${kutu.dataset.modul}`]: kutu.checked });
+                } catch (e) { alert('Kaydedilemedi: ' + e.message); kutu.checked = !kutu.checked; }
+            });
+        });
+
+        document.getElementById('genelKaydet').addEventListener('click', async () => {
+            const sonucEl = document.getElementById('genelSonuc');
+            sonucEl.textContent = 'Kaydediliyor...';
+            try {
+                await window.wnersdevApi.gonder('/api/guild/' + GUILD_ID, 'PATCH', {
+                    prefix: document.getElementById('ayarPrefix').value,
+                    dil: document.getElementById('ayarDil').value,
+                    'ekonomiAyar.paraBirimi': document.getElementById('ayarParaBirimi').value,
+                    'ekonomiAyar.günlükMiktar': parseInt(document.getElementById('ayarGunlukMiktar').value, 10) || 250
+                });
+                sonucEl.textContent = '✅ Kaydedildi.';
+            } catch (e) { sonucEl.textContent = '❌ ' + e.message; }
+        });
+
+        document.getElementById('hosgeldinKaydet').addEventListener('click', async () => {
+            const sonucEl = document.getElementById('hosgeldinSonuc');
+            sonucEl.textContent = 'Kaydediliyor...';
+            try {
+                await window.wnersdevApi.gonder('/api/guild/' + GUILD_ID, 'PATCH', {
+                    'hoşgeldinMesaj.icerik': document.getElementById('ayarHosgeldinMesaj').value,
+                    'hoşgeldinMesaj.canvasAktif': document.getElementById('ayarHosgeldinCanvas').checked
+                });
+                sonucEl.textContent = '✅ Kaydedildi.';
+            } catch (e) { sonucEl.textContent = '❌ ' + e.message; }
+        });
+    } catch {
+        document.getElementById('ayarlarIcerik').innerHTML = '<div class="hata-kutusu">❌ Ayarlar yüklenemedi. <button class="buton" onclick="yukle()">Tekrar Dene</button></div>';
+    }
+}
+yukle();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

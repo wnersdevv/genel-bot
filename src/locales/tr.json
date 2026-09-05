@@ -1,0 +1,60 @@
+{
+  "genel": {
+    "hataOlustu": "Bir hata oluştu, lütfen daha sonra tekrar deneyin.",
+    "yetkiYok": "Bu işlemi yapmak için yetkiniz yok.",
+    "botYetkiYok": "Bu işlemi yapabilmem için gerekli yetkiye sahip değilim.",
+    "sadeceSunucuda": "Bu komut yalnızca sunucu içinde kullanılabilir.",
+    "modulKapali": "Bu modül şu anda bu sunucuda kapalı.",
+    "komutKapali": "Bu komut yönetici tarafından bu sunucuda devre dışı bırakılmış.",
+    "gecersizKullanici": "Geçerli bir kullanıcı belirtmelisiniz.",
+    "kullaniciBulunamadi": "Belirttiğiniz kullanıcı bu sunucuda bulunamadı.",
+    "kendineKullanamazsin": "Bu komutu kendi üzerinizde kullanamazsınız.",
+    "yetersizRutbe": "Bu kullanıcı üzerinde işlem yapmak için yeterli rol seviyesine sahip değilsiniz.",
+    "islemIptal": "İşlem iptal edildi.",
+    "islemOnaylandi": "İşlem onaylandı.",
+    "cooldown": "Bu komutu tekrar kullanmadan önce **{sure} saniye** beklemelisiniz.",
+    "yukleniyor": "İşleniyor...",
+    "bulunamadi": "Kayıt bulunamadı.",
+    "basarili": "İşlem başarılı.",
+    "sadeceGelistirici": "Bu komut yalnızca geliştiriciler tarafından kullanılabilir."
+  },
+  "moderasyon": {
+    "uyariVerildi": "**{kullanici}** kullanıcısı uyarıldı.",
+    "susturuldu": "**{kullanici}** kullanıcısı **{sure}** boyunca susturuldu.",
+    "susturmaKaldirildi": "**{kullanici}** kullanıcısının susturması kaldırıldı.",
+    "atildi": "**{kullanici}** sunucudan atıldı.",
+    "yasaklandi": "**{kullanici}** sunucudan yasaklandı.",
+    "yasakKaldirildi": "**{kullanici}** kullanıcısının yasağı kaldırıldı.",
+    "mesajlarSilindi": "**{adet}** mesaj başarıyla silindi.",
+    "sebep": "Sebep",
+    "sebepYok": "Sebep belirtilmedi"
+  },
+  "ticket": {
+    "acildi": "Ticket başarıyla oluşturuldu: {kanal}",
+    "kapatildi": "Bu ticket kapatıldı.",
+    "kilitlendi": "Bu ticket kilitlendi.",
+    "zatenTicketVar": "Aynı anda en fazla **{limit}** açık ticketınız olabilir.",
+    "ticketDegil": "Bu kanal bir ticket değil.",
+    "yetkiliOlmali": "Bu işlem için ticket yetkilisi olmalısınız."
+  },
+  "ekonomi": {
+    "bakiye": "Bakiye",
+    "cuzdan": "Cüzdan",
+    "banka": "Banka",
+    "yetersizBakiye": "Cüzdanınızda bu kadar para yok.",
+    "gunlukAlindi": "**{miktar}** kazandınız!",
+    "gunlukZatenAlindi": "Günlük ödülünüzü tekrar almak için **{sure} saat** beklemelisiniz."
+  },
+  "seviye": {
+    "seviyeAtladi": "Tebrikler {kullanici}, **Seviye {seviye}**'e ulaştın!",
+    "xpYok": "**{kullanici}** henüz XP kazanmamış.",
+    "liderlikBos": "Henüz kimse XP kazanmamış."
+  },
+  "muzik": {
+    "sesKanalindaDegil": "Bu komutu kullanmak için bir ses kanalında olmalısın.",
+    "calanYok": "Şu anda çalan bir şarkı yok.",
+    "kuyrugaEklendi": "**{sarki}** kuyruğa eklendi.",
+    "simdiCaliyor": "Şimdi çalıyor: **{sarki}**",
+    "kuyrukBos": "Kuyrukta şarkı yok."
+  }
+}

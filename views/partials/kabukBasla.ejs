@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <title><%= typeof sayfaBaslik !== 'undefined' ? sayfaBaslik + ' — wnersdev' : 'wnersdev Dashboard' %></title>
+    <script src="/js/tema.js"></script>
+    <script src="/soket/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/tema.css">
+</head>
+<body>
+<div class="uygulama">
+    <aside class="kenar-cubugu" id="kenarCubugu">
+        <div class="marka">🤖 wnersdev</div>
+
+        <% if (typeof guild !== 'undefined' && guild) { %>
+        <div class="bolum-baslik">ANA SAYFA</div>
+        <a class="nav-link <%= aktif === 'genel' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>">🏠 Genel Bakış</a>
+
+        <div class="bolum-baslik">SUNUCU</div>
+        <a class="nav-link <%= aktif === 'uyeler' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/uyeler">👥 Üyeler</a>
+        <a class="nav-link <%= aktif === 'roller' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/roller-kanallar">🎭 Roller &amp; Kanallar</a>
+        <a class="nav-link <%= aktif === 'komutlar' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/komutlar">📝 Komutlar</a>
+        <a class="nav-link <%= aktif === 'welcome' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/welcome">👋 Karşılama</a>
+
+        <div class="bolum-baslik">MODERASYON</div>
+        <a class="nav-link <%= aktif === 'moderasyon' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/moderasyon">🔨 Moderasyon</a>
+
+        <div class="bolum-baslik">DESTEK</div>
+        <a class="nav-link <%= aktif === 'ticket' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/ticketlar">🎫 Ticket</a>
+        <a class="nav-link <%= aktif === 'oneriler' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/oneriler">📨 Öneriler</a>
+
+        <div class="bolum-baslik">EĞLENCE</div>
+        <a class="nav-link <%= aktif === 'muzik' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/muzik">🎵 Müzik</a>
+        <a class="nav-link <%= aktif === 'cekilisler' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/cekilisler">🎉 Çekilişler</a>
+        <a class="nav-link <%= aktif === 'analitik' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/analitik">📈 Analitik</a>
+
+        <div class="bolum-baslik">SİSTEM</div>
+        <a class="nav-link <%= aktif === 'marka' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/marka">🎨 Bot Kimliği</a>
+        <a class="nav-link <%= aktif === 'audit' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/audit">📋 Denetim Kaydı</a>
+        <a class="nav-link <%= aktif === 'ayarlar' ? 'aktif' : '' %>" href="/sunucu/<%= guild.id %>/ayarlar">⚙️ Ayarlar</a>
+        <a class="nav-link <%= aktif === 'bot-durumu' ? 'aktif' : '' %>" href="/bot-durumu">🩺 Sistem Sağlığı</a>
+        <a class="nav-link" href="/sunucular">🔁 Sunucu Değiştir</a>
+        <% } else { %>
+        <div class="bolum-baslik">ANA SAYFA</div>
+        <a class="nav-link <%= aktif === 'sunucular' ? 'aktif' : '' %>" href="/sunucular">🏠 Sunucularım</a>
+        <a class="nav-link <%= aktif === 'bot-durumu' ? 'aktif' : '' %>" href="/bot-durumu">🩺 Sistem Sağlığı</a>
+        <% } %>
+
+        <div class="bolum-baslik">&nbsp;</div>
+        <a class="nav-link" href="<%= config.destekSunucusu %>" target="_blank" rel="noopener">💬 Destek</a>
+    </aside>
+
+    <div class="icerik-alani">
+        <header class="ust-cubuk">
+            <button class="hamburger" onclick="document.getElementById('kenarCubugu').classList.toggle('acik')">☰</button>
+
+            <div class="arama-kutusu">
+                🔎 <input type="text" id="globalArama" placeholder="Üye, komut, ticket ara...">
+            </div>
+
+            <div class="ust-cubuk-sag">
+                <div class="tema-secici">
+                    <select id="temaSecim" class="giris-select" onchange="window.wnersdevTema.temaDegistir(this.value)">
+                        <option value="discord">Discord</option>
+                        <option value="midnight">Midnight</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="purple">Purple</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="cyber">Cyber</option>
+                        <option value="özel">Özel</option>
+                    </select>
+                    <button class="mod-buton" id="modButon" onclick="window.wnersdevTema.modToggle(); guncelleModIkon();">🌙</button>
+                </div>
+
+                <div class="profil-dropdown">
+                    <% if (typeof guild !== 'undefined' && guild) { %>
+                    <div class="bildirim-zil" id="bildirimZil">
+                        🔔<span class="bildirim-nokta" id="bildirimNokta"></span>
+                    </div>
+                    <div class="bildirim-panel" id="bildirimPanel"></div>
+                    <% } %>
+                </div>
+
+                <% if (kullanici) { %>
+                <div class="profil-dropdown">
+                    <img class="profil-avatar" id="profilAvatar" src="https://cdn.discordapp.com/avatars/<%= kullanici.id %>/<%= kullanici.avatar %>.png" onclick="document.getElementById('profilMenu').classList.toggle('acik')" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                    <div class="profil-menu" id="profilMenu">
+                        <a href="/sunucular">Sunucularım</a>
+                        <a href="<%= config.destekSunucusu %>" target="_blank">Destek</a>
+                        <a href="/cikis">Çıkış Yap</a>
+                    </div>
+                </div>
+                <% } else { %>
+                <a class="buton" href="/auth/discord">Giriş Yap</a>
+                <% } %>
+            </div>
+        </header>
+
+        <main class="sayfa-govde fade-in">

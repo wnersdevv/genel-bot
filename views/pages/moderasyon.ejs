@@ -1,0 +1,66 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🔨 Moderasyon</h1>
+<p class="sayfa-alt">Uyarılar, banlar ve atmalar — gerçek verilerle.</p>
+
+<div class="kart" style="margin-bottom:20px;">
+    <div class="baslik" style="color:var(--text-muted);font-weight:600;margin-bottom:12px;">➕ Hızlı Uyarı Ver</div>
+    <div class="grid-2">
+        <div class="form-alan"><label>Kullanıcı ID</label><input class="giris-input" id="uyariKullaniciId" placeholder="123456789012345678"></div>
+        <div class="form-alan"><label>Sebep</label><input class="giris-input" id="uyariSebep" placeholder="Sebep (opsiyonel)"></div>
+    </div>
+    <button class="buton" id="uyariVerButon">Uyarı Ver</button>
+    <span id="uyariSonuc" style="margin-left:10px;font-size:.85rem;"></span>
+</div>
+
+<div class="grid-2" style="margin-bottom:20px;">
+    <div class="kart"><div class="baslik" style="color:var(--text-muted);">🔨 Son Banlar (Denetim Kaydı)</div><div id="sonBanlar">Yükleniyor...</div></div>
+    <div class="kart"><div class="baslik" style="color:var(--text-muted);">👢 Son Atmalar (Denetim Kaydı)</div><div id="sonAtmalar">Yükleniyor...</div></div>
+</div>
+
+<div class="tablo-sarici">
+    <table class="tablo">
+        <thead><tr><th>Case</th><th>Kullanıcı</th><th>Yetkili</th><th>Sebep</th><th>Tarih</th></tr></thead>
+        <tbody id="uyariTablo"><tr><td colspan="5">Yükleniyor...</td></tr></tbody>
+    </table>
+</div>
+
+<script>
+async function uyarilariYukle() {
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/moderasyon');
+        document.getElementById('uyariTablo').innerHTML = veri.uyarilar.length
+            ? veri.uyarilar.map(u => `<tr><td>#${u.caseNo}</td><td>${u.kullaniciId}</td><td>${u.yetkiliId}</td><td>${u.sebep}</td><td>${window.wnersdevApi.zamanOnce(u.createdAt)}</td></tr>`).join('')
+            : '<tr><td colspan="5">Henüz uyarı yok.</td></tr>';
+
+        document.getElementById('sonBanlar').innerHTML = veri.sonBanlar.length
+            ? veri.sonBanlar.map(b => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem;">${b.hedefId} — ${b.sebep || 'Sebep yok'}</div>`).join('')
+            : '<div style="color:var(--text-muted);font-size:.85rem;">Kayıt yok veya bot Denetim Kaydı yetkisine sahip değil.</div>';
+
+        document.getElementById('sonAtmalar').innerHTML = veri.sonAtmalar.length
+            ? veri.sonAtmalar.map(b => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem;">${b.hedefId} — ${b.sebep || 'Sebep yok'}</div>`).join('')
+            : '<div style="color:var(--text-muted);font-size:.85rem;">Kayıt yok veya bot Denetim Kaydı yetkisine sahip değil.</div>';
+    } catch {
+        document.getElementById('uyariTablo').innerHTML = '<tr><td colspan="5">❌ Yüklenemedi. <button class="buton ikincil" onclick="uyarilariYukle()">Tekrar Dene</button></td></tr>';
+    }
+}
+uyarilariYukle();
+
+document.getElementById('uyariVerButon').addEventListener('click', async () => {
+    const kullaniciId = document.getElementById('uyariKullaniciId').value.trim();
+    const sebep = document.getElementById('uyariSebep').value.trim();
+    const sonucEl = document.getElementById('uyariSonuc');
+    if (!kullaniciId) return sonucEl.textContent = 'Kullanıcı ID gerekli.';
+
+    sonucEl.textContent = 'Gönderiliyor...';
+    try {
+        await window.wnersdevApi.gonder('/api/guild/<%= guild.id %>/moderasyon/uyar', 'POST', { kullaniciId, sebep });
+        sonucEl.textContent = '✅ Uyarı verildi.';
+        document.getElementById('uyariKullaniciId').value = '';
+        document.getElementById('uyariSebep').value = '';
+        uyarilariYukle();
+    } catch (e) {
+        sonucEl.textContent = '❌ ' + e.message;
+    }
+});
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

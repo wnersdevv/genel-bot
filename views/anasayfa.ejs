@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="wnersdev — moderasyon, koruma, ticket, ekonomi, seviye ve daha fazlasını tek botta birleştiren Türkçe Discord botu.">
+    <title>wnersdev — Tek bot, bütün sunucu</title>
+    <script src="/js/tema.js"></script>
+    <link rel="stylesheet" href="/css/tema.css">
+    <style>
+        .site-ust { display:flex; align-items:center; justify-content:space-between; padding:18px 30px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--background); z-index:10; }
+        .site-marka { font-weight:800; font-size:1.2rem; color:var(--primary); }
+        .site-nav { display:flex; gap:18px; align-items:center; }
+        .site-nav a { color:var(--text-muted); font-size:.9rem; }
+        .site-nav a:hover { color:var(--text); }
+        .kahraman { text-align:center; padding:70px 24px 50px; }
+        .kahraman h1 { font-size:2.6rem; margin:0 0 14px; line-height:1.2; }
+        .kahraman .vurgu { background:linear-gradient(90deg,var(--primary),var(--secondary)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .kahraman p { color:var(--text-muted); max-width:600px; margin:0 auto 28px; font-size:1.05rem; }
+        .kahraman-butonlar { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+        .bolum { max-width:1000px; margin:0 auto; padding:40px 24px; }
+        .bolum h2 { text-align:center; font-size:1.6rem; margin-bottom:6px; }
+        .bolum .alt { text-align:center; color:var(--text-muted); margin-bottom:28px; }
+        .ozellik { text-align:center; }
+        .ozellik .ikon { font-size:2rem; margin-bottom:8px; }
+        .ozellik h4 { margin:0 0 6px; }
+        .ozellik p { color:var(--text-muted); font-size:.86rem; margin:0; }
+        @media (max-width:700px){ .kahraman h1{font-size:1.9rem} .site-nav a:not(.buton){display:none} }
+    </style>
+</head>
+<body>
+<div class="site-ust">
+    <span class="site-marka">🤖 wnersdev</span>
+    <nav class="site-nav">
+        <a href="/komutlar">Komutlar</a>
+        <a href="/durum">Durum</a>
+        <a href="<%= config.destekSunucusu %>" target="_blank" rel="noopener">Destek</a>
+        <% if (kullanici) { %>
+            <a class="buton" href="/sunucular">Panele Git</a>
+        <% } else { %>
+            <a class="buton" href="/auth/discord">Giriş Yap</a>
+        <% } %>
+    </nav>
+</div>
+
+<div class="kahraman fade-in">
+    <h1>Tek bot, <span class="vurgu">bütün sunucu</span>.</h1>
+    <p>Moderasyon, koruma, ticket, ekonomi, seviye, çekiliş ve daha fazlası. Tamamen Türkçe, gerçek zamanlı web paneliyle yönetilen bir Discord botu.</p>
+    <div class="kahraman-butonlar">
+        <a class="buton" href="https://discord.com/oauth2/authorize?client_id=<%= clientId %>&scope=bot%20applications.commands&permissions=8" target="_blank" rel="noopener">➕ Sunucuna Ekle</a>
+        <a class="buton ikincil" href="/komutlar">📖 Komutları İncele</a>
+    </div>
+</div>
+
+<div class="bolum">
+    <div class="grid" id="istatistikler">
+        <div class="kart istatistik-kart"><div class="baslik">🌐 Sunucu</div><div class="deger iskelet" style="height:30px;width:60px;">&nbsp;</div></div>
+        <div class="kart istatistik-kart"><div class="baslik">👥 Kullanıcı</div><div class="deger iskelet" style="height:30px;width:60px;">&nbsp;</div></div>
+        <div class="kart istatistik-kart"><div class="baslik">⚙️ Komut</div><div class="deger iskelet" style="height:30px;width:60px;">&nbsp;</div></div>
+        <div class="kart istatistik-kart"><div class="baslik">🟢 Durum</div><div class="deger iskelet" style="height:30px;width:60px;">&nbsp;</div></div>
+    </div>
+</div>
+
+<div class="bolum">
+    <h2>Neler Yapabilir?</h2>
+    <p class="alt">16 modül, 140'tan fazla komut</p>
+    <div class="grid">
+        <div class="kart ozellik"><div class="ikon">🛡️</div><h4>Moderasyon</h4><p>Uyarı, susturma, ban, softban ve birleşik case geçmişi</p></div>
+        <div class="kart ozellik"><div class="ikon">🔐</div><h4>Koruma</h4><p>Anti-spam, anti-raid, anti-nuke, link ve kelime filtresi</p></div>
+        <div class="kart ozellik"><div class="ikon">🎫</div><h4>Ticket</h4><p>6 kategori, transkript kaydı, yetkili yönetimi</p></div>
+        <div class="kart ozellik"><div class="ikon">🎵</div><h4>Müzik</h4><p>Kuyruk, döngü, geçmiş ve panelden canlı takip</p></div>
+        <div class="kart ozellik"><div class="ikon">💰</div><h4>Ekonomi</h4><p>Sanal para, günlük ödül, transfer ve envanter</p></div>
+        <div class="kart ozellik"><div class="ikon">⭐</div><h4>Seviye</h4><p>XP sistemi, canvas kartlar, seviye ödül rolleri</p></div>
+        <div class="kart ozellik"><div class="ikon">🎉</div><h4>Çekiliş</h4><p>Şartlı katılım, otomatik bitiş ve kazanan seçimi</p></div>
+        <div class="kart ozellik"><div class="ikon">🏠</div><h4>Özel Oda</h4><p>Geçici ses kanalları, tam sahiplik kontrolü</p></div>
+    </div>
+</div>
+
+<div class="bolum">
+    <h2>Web Panelinden Yönet</h2>
+    <p class="alt">Discord hesabınla giriş yap, her şeyi tarayıcıdan ayarla</p>
+    <div class="grid-2">
+        <div class="kart">
+            <h4 style="margin-top:0;">🎨 7 Tema + Dark/Light</h4>
+            <p style="color:var(--text-muted);font-size:.88rem;">Discord, Midnight, Ocean, Purple, Emerald, Sunset, Cyber ve özel renk seçeneği.</p>
+        </div>
+        <div class="kart">
+            <h4 style="margin-top:0;">⚡ Gerçek Zamanlı</h4>
+            <p style="color:var(--text-muted);font-size:.88rem;">Socket.IO ile bot durumu ve bildirimler anlık olarak panele düşer.</p>
+        </div>
+        <div class="kart">
+            <h4 style="margin-top:0;">🔒 Güvenli</h4>
+            <p style="color:var(--text-muted);font-size:.88rem;">Discord OAuth2, CSRF koruması ve yetki doğrulaması.</p>
+        </div>
+        <div class="kart">
+            <h4 style="margin-top:0;">🌍 Çift Dil</h4>
+            <p style="color:var(--text-muted);font-size:.88rem;">Türkçe ve İngilizce arayüz desteği, sunucu bazında seçilebilir.</p>
+        </div>
+    </div>
+</div>
+
+<div class="bolum" style="text-align:center;">
+    <div class="kart">
+        <h2 style="margin-top:0;">Hemen Başla</h2>
+        <p class="alt">Kurulum sihirbazı seni birkaç adımda hazır hale getirir.</p>
+        <a class="buton" href="https://discord.com/oauth2/authorize?client_id=<%= clientId %>&scope=bot%20applications.commands&permissions=8" target="_blank" rel="noopener">➕ Sunucuna Ekle</a>
+    </div>
+</div>
+
+<footer class="altbilgi">
+    <div style="margin-bottom:6px;">
+        <a href="/komutlar">Komut Rehberi</a> ·
+        <a href="/durum">Sistem Durumu</a> ·
+        <a href="/hizmet-sartlari">Hizmet Şartları</a> ·
+        <a href="/gizlilik">Gizlilik Politikası</a> ·
+        <a href="<%= config.destekSunucusu %>" target="_blank" rel="noopener">Destek</a>
+    </div>
+    wnersdev • Discord Bot Yönetim Paneli — © 2026 wnersdev
+</footer>
+
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+    try {
+        const v = await window.wnersdevApi.al('/api/genel/istatistik');
+        const kartlar = document.querySelectorAll('#istatistikler .deger');
+        const degerler = [
+            window.wnersdevApi.sayiFormat(v.sunucuSayısı),
+            window.wnersdevApi.sayiFormat(v.kullanıcıSayısı),
+            window.wnersdevApi.sayiFormat(v.komutSayısı),
+            v.çevrimiçi ? '🟢 Aktif' : '🔴 Kapalı'
+        ];
+        kartlar.forEach((el, i) => { el.classList.remove('iskelet'); el.style = ''; el.textContent = degerler[i]; });
+    } catch {
+        document.getElementById('istatistikler').style.display = 'none';
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">🎨 Bot Kimliği</h1>
+<p class="sayfa-alt">Botun bu sunucudaki görünen adını, rengini ve markasını özelleştirin. Ayarlar yalnızca bu sunucuda geçerlidir.</p>
+
+<div class="kart" style="margin-bottom:16px;border-left:3px solid var(--warning);">
+    <b>⚠️ Discord kısıtı:</b> Discord, bir botun <b>global kullanıcı adının</b> sunucuya özel değiştirilmesine izin vermez.
+    Buradaki ayarlar embedlerde, panel başlığında, sistem ve log mesajlarında kullanılır.
+</div>
+
+<div id="icerik"><div class="iskelet" style="height:360px;"></div></div>
+
+<script>
+const GUILD_ID = '<%= guild.id %>';
+let MARKA = null;
+
+function onizleme() {
+    const renk = document.getElementById('embedRengi').value;
+    const ad = document.getElementById('botAdi').value || 'wnersdev';
+    const alt = document.getElementById('altBilgi').value || `${ad} • Sunucu Yönetimi`;
+    const logo = document.getElementById('logoUrl').value;
+
+    document.getElementById('onizlemeAlani').innerHTML = `
+        <div style="display:flex;background:var(--background);border-radius:6px;overflow:hidden;">
+            <div style="width:4px;background:${renk};flex-shrink:0;"></div>
+            <div style="padding:12px 16px;flex:1;">
+                <div style="font-weight:700;margin-bottom:6px;">${ad} — Örnek Bildirim</div>
+                <div style="color:var(--text-muted);font-size:.88rem;">Bu embed, sunucunuzun marka ayarlarıyla böyle görünecek.</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:10px;color:var(--text-muted);font-size:.76rem;">
+                    ${logo ? `<img src="${logo}" style="width:18px;height:18px;border-radius:50%;" onerror="this.style.display='none'">` : ''}
+                    <span>${alt}</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+async function yukle() {
+    try {
+        MARKA = await window.wnersdevApi.al(`/api/guild/${GUILD_ID}/branding`);
+
+        document.getElementById('icerik').innerHTML = `
+            <div class="grid-2">
+                <div class="kart">
+                    <h3 style="margin-top:0;">✏️ Marka Ayarları</h3>
+                    <div class="form-alan"><label>Bot Adı (maks. 32)</label><input class="giris-input" id="botAdi" maxlength="32" value="${MARKA.botAdi === 'wnersdev' ? '' : MARKA.botAdi}" placeholder="wnersdev"></div>
+                    <div class="form-alan"><label>Embed Rengi</label><input type="color" class="giris-input" id="embedRengi" value="${MARKA.embedRengi}"></div>
+                    <div class="form-alan"><label>Alt Bilgi (maks. 100)</label><input class="giris-input" id="altBilgi" maxlength="100" value="${MARKA.altBilgi}"></div>
+                    <div class="form-alan"><label>Panel Başlığı</label><input class="giris-input" id="panelBasligi" maxlength="64" value="${MARKA.panelBasligi || ''}" placeholder="NovaGuard Yönetim Merkezi"></div>
+                    <div class="form-alan"><label>Logo URL (https)</label><input class="giris-input" id="logoUrl" value="${MARKA.logoUrl || ''}" placeholder="https://..."></div>
+                    <div class="form-alan"><label>Destek Bağlantısı (https)</label><input class="giris-input" id="destekUrl" value="${MARKA.destekUrl || ''}" placeholder="https://discord.gg/..."></div>
+                    <button class="buton" id="kaydet">Kaydet</button>
+                    <button class="buton ikincil" id="sifirla">Sıfırla</button>
+                    <span id="sonuc" style="margin-left:10px;font-size:.85rem;"></span>
+                </div>
+
+                <div class="kart">
+                    <h3 style="margin-top:0;">👁️ Canlı Önizleme</h3>
+                    <div id="onizlemeAlani"></div>
+                    <p style="color:var(--text-muted);font-size:.8rem;margin-top:12px;">
+                        Bu önizleme tarayıcıda oluşturulur; Discord'daki gerçek embed küçük farklılıklar gösterebilir.
+                    </p>
+                </div>
+            </div>`;
+
+        ['botAdi', 'embedRengi', 'altBilgi', 'logoUrl'].forEach(id =>
+            document.getElementById(id).addEventListener('input', onizleme));
+        onizleme();
+
+        document.getElementById('kaydet').addEventListener('click', async () => {
+            const sonucEl = document.getElementById('sonuc');
+            sonucEl.textContent = 'Kaydediliyor...';
+            try {
+                MARKA = await window.wnersdevApi.gonder(`/api/guild/${GUILD_ID}/branding`, 'PATCH', {
+                    botAdi: document.getElementById('botAdi').value || null,
+                    embedRengi: document.getElementById('embedRengi').value,
+                    altBilgi: document.getElementById('altBilgi').value || null,
+                    panelBasligi: document.getElementById('panelBasligi').value || null,
+                    logoUrl: document.getElementById('logoUrl').value || null,
+                    destekUrl: document.getElementById('destekUrl').value || null
+                });
+                sonucEl.textContent = '✅ Kaydedildi';
+            } catch (e) { sonucEl.textContent = '❌ ' + e.message; }
+            setTimeout(() => { sonucEl.textContent = ''; }, 2500);
+        });
+
+        document.getElementById('sifirla').addEventListener('click', async () => {
+            if (!confirm('Marka ayarları varsayılana döndürülecek. Onaylıyor musunuz?')) return;
+            try {
+                await window.wnersdevApi.gonder(`/api/guild/${GUILD_ID}/branding`, 'PATCH', {
+                    botAdi: null, embedRengi: '#5865F2', altBilgi: null,
+                    panelBasligi: null, logoUrl: null, destekUrl: null
+                });
+                location.reload();
+            } catch (e) { alert('Sıfırlanamadı: ' + e.message); }
+        });
+    } catch (e) {
+        document.getElementById('icerik').innerHTML = `<div class="hata-kutusu">❌ ${e.message}<br><button class="buton" onclick="yukle()">Tekrar Dene</button></div>`;
+    }
+}
+yukle();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>

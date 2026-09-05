@@ -1,0 +1,14 @@
+<%- include('../partials/kabukBasla', { guild: null, aktif: '', sayfaBaslik: baslik, kullanici, config }) %>
+<div class="hata-kutusu">
+    <div style="font-size:3rem;margin-bottom:8px;">⚠️</div>
+    <h2 style="margin:0 0 8px;"><%= baslik %></h2>
+    <p style="max-width:520px;margin:0 auto 20px;"><%= mesaj %></p>
+
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <% if (typeof butonUrl !== 'undefined' && butonUrl) { %>
+            <a class="buton" href="<%= butonUrl %>" target="_blank" rel="noopener"><%= butonMetni || 'Devam Et' %></a>
+        <% } %>
+        <a class="buton ikincil" href="/sunucular">← Sunucularıma Dön</a>
+    </div>
+</div>
+<%- include('../partials/kabukBitir', { guild: null }) %>

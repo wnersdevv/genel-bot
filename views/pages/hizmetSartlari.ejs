@@ -1,0 +1,39 @@
+<%- include('../partials/kabukBasla', { guild: null, aktif: '', sayfaBaslik: 'Hizmet Şartları', kullanici, config }) %>
+<div style="max-width:820px;">
+    <h1 class="sayfa-baslik">📜 Hizmet Şartları</h1>
+    <p class="sayfa-alt">Son güncelleme: <%= new Date().toLocaleDateString('tr-TR') %></p>
+
+    <div class="kart" style="line-height:1.7;">
+        <h3>1. Hizmetin Kabulü</h3>
+        <p>wnersdev botunu bir Discord sunucusuna ekleyerek veya komutlarını kullanarak bu şartları kabul etmiş sayılırsınız. Şartları kabul etmiyorsanız botu sunucunuzdan kaldırabilirsiniz.</p>
+
+        <h3>2. Kullanım Kuralları</h3>
+        <ul>
+            <li>Bot, <a href="https://discord.com/terms" target="_blank" rel="noopener">Discord Hizmet Şartları</a> ve <a href="https://discord.com/guidelines" target="_blank" rel="noopener">Topluluk Kuralları</a>'na aykırı şekilde kullanılamaz.</li>
+            <li>Botu spam, taciz, kötüye kullanım veya yasa dışı faaliyetler için kullanamazsınız.</li>
+            <li>Botun API'lerini veya altyapısını aşırı yüklemeye yönelik otomatik istekler göndermek yasaktır.</li>
+            <li>Bot üzerinden elde edilen sanal para birimi ve seviye verilerinin gerçek para değeri yoktur, alınıp satılamaz.</li>
+        </ul>
+
+        <h3>3. Hizmetin Sürekliliği</h3>
+        <p>Bot "olduğu gibi" sunulur. Kesintisiz veya hatasız çalışacağı garanti edilmez. Bakım, güncelleme veya teknik sorunlar nedeniyle hizmet geçici olarak durabilir.</p>
+
+        <h3>4. Sorumluluk Sınırı</h3>
+        <p>Botun kullanımından doğan veri kaybı, sunucu yapılandırma hataları veya dolaylı zararlardan sorumluluk kabul edilmez. Yedekleme özelliği bir garanti değil, yardımcı bir araçtır; kritik yapılandırmalarınızı ayrıca kaydetmeniz önerilir.</p>
+
+        <h3>5. Erişimin Sonlandırılması</h3>
+        <p>Bu şartları ihlal eden kullanıcıların veya sunucuların bota erişimi önceden bildirim yapılmaksızın kısıtlanabilir.</p>
+
+        <h3>6. Değişiklikler</h3>
+        <p>Bu şartlar zaman zaman güncellenebilir. Önemli değişiklikler destek sunucusu üzerinden duyurulur.</p>
+
+        <h3>7. İletişim</h3>
+        <p>Sorularınız için <a href="<%= config.destekSunucusu %>" target="_blank" rel="noopener">destek sunucumuza</a> katılabilirsiniz.</p>
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:10px;">
+        <a class="buton ikincil" href="/gizlilik">🔒 Gizlilik Politikası</a>
+        <a class="buton ikincil" href="/">← Ana Sayfa</a>
+    </div>
+</div>
+<%- include('../partials/kabukBitir', { guild: null }) %>

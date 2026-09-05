@@ -1,0 +1,54 @@
+<%- include('../partials/kabukBasla', { guild, aktif, sayfaBaslik, kullanici, config }) %>
+<h1 class="sayfa-baslik">Günaydın, <%= kullanici.username %> 👋</h1>
+<p class="sayfa-alt">wnersdev kontrol merkezine hoş geldin — <b><%= guild.name %></b> sunucusunu yönetiyorsun.</p>
+
+<div class="grid" id="istatistikKartlari">
+    <div class="kart istatistik-kart"><div class="baslik">👥 Toplam Üye</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🙋 İnsan Üye</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🎫 Açık Ticket</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🚨 Toplam Uyarı</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">🎉 Aktif Çekiliş</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+    <div class="kart istatistik-kart"><div class="baslik">📨 Bekleyen Öneri</div><div class="deger iskelet" style="height:32px;width:60px;">&nbsp;</div></div>
+</div>
+
+<div class="grid-2" style="margin-top:22px;">
+    <div class="kart">
+        <div class="baslik" style="color:var(--text-muted);font-weight:600;margin-bottom:10px;">🤖 Bot Durumu</div>
+        <div id="botDurumMini">Yükleniyor...</div>
+    </div>
+    <div class="kart">
+        <div class="baslik" style="color:var(--text-muted);font-weight:600;margin-bottom:10px;">💎 Abonelik Planı</div>
+        <div id="planMini">Yükleniyor...</div>
+        <a class="buton ikincil" style="margin-top:12px;display:inline-block;" href="/sunucu/<%= guild.id %>/ayarlar">Ayarlara Git</a>
+    </div>
+</div>
+
+<script>
+(async () => {
+    const kartlar = document.querySelectorAll('#istatistikKartlari .deger');
+    try {
+        const veri = await window.wnersdevApi.al('/api/guild/<%= guild.id %>/istatistik');
+        const degerler = [veri.üyeSayısı, veri.insanSayısı, veri.açıkTicket, veri.toplamUyarı, veri.aktifÇekiliş, veri.bekleyenÖneri];
+        kartlar.forEach((el, i) => {
+            el.classList.remove('iskelet');
+            el.style = '';
+            el.textContent = window.wnersdevApi.sayiFormat(degerler[i]);
+        });
+        document.getElementById('planMini').innerHTML = `<span class="rozet rozet-mor">${veri.plan}</span>`;
+    } catch (e) {
+        document.getElementById('istatistikKartlari').innerHTML = '<div class="hata-kutusu">❌ Bir şeyler ters gitti.<br><button class="buton" onclick="location.reload()">Tekrar Dene</button></div>';
+    }
+
+    try {
+        const durum = await window.wnersdevApi.al('/api/bot/durum');
+        document.getElementById('botDurumMini').innerHTML = `
+            <div><span class="durum-noktasi ${durum.discordOnline ? 'durum-yesil' : 'durum-kirmizi'}"></span>Discord API — ${durum.discordOnline ? 'Online' : 'Offline'}</div>
+            <div style="margin-top:6px;"><span class="durum-noktasi ${durum.mongoBagliMi ? 'durum-yesil' : 'durum-kirmizi'}"></span>MongoDB — ${durum.mongoDurum}</div>
+            <div style="margin-top:6px;color:var(--text-muted);font-size:.85rem;">Ping: ${durum.discordPing}ms</div>
+        `;
+    } catch {
+        document.getElementById('botDurumMini').textContent = 'Durum alınamadı.';
+    }
+})();
+</script>
+<%- include('../partials/kabukBitir', { guild }) %>
